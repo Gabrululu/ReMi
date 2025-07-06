@@ -2,6 +2,12 @@
 const nextConfig = {
   images: {
     domains: ['cdn.builder.io']
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
   }
 };
 

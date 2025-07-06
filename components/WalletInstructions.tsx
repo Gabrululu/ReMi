@@ -78,7 +78,7 @@ export function WalletInstructions() {
                 </div>
                 <div>
                   <p className="text-sm text-gray-700 dark:text-gray-200">
-                    <strong>Haz clic en "Conectar":</strong> Se mostrará tu wallet recomendada
+                    <strong>Haz clic en &quot;Conectar&quot;:</strong> Se mostrará tu wallet recomendada
                   </p>
                 </div>
               </div>
@@ -137,7 +137,7 @@ export function WalletInstructions() {
                 </div>
                 <div>
                   <p className="text-sm text-gray-700 dark:text-gray-200">
-                    <strong>Haz clic en "Conectar Wallet":</strong> Se mostrará un código QR
+                    <strong>Haz clic en &quot;Conectar Wallet&quot;:</strong> Se mostrará un código QR
                   </p>
                 </div>
               </div>

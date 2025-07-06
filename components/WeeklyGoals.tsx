@@ -47,8 +47,7 @@ export function WeeklyGoals({ network }: WeeklyGoalsProps) {
   }, [address]);
 
   const loadGoals = () => {
-    if (!address) return;
-    
+    if (!address || typeof window === 'undefined') return;
     const savedGoals = localStorage.getItem(`goals_${address}`);
     if (savedGoals) {
       setGoals(JSON.parse(savedGoals));
@@ -56,8 +55,7 @@ export function WeeklyGoals({ network }: WeeklyGoalsProps) {
   };
 
   const saveGoals = (newGoals: Goal[]) => {
-    if (!address) return;
-    
+    if (!address || typeof window === 'undefined') return;
     localStorage.setItem(`goals_${address}`, JSON.stringify(newGoals));
     setGoals(newGoals);
   };

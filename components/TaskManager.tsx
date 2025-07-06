@@ -49,8 +49,7 @@ export function TaskManager({ network }: TaskManagerProps) {
   }, [address]);
 
   const loadTasks = () => {
-    if (!address) return;
-    
+    if (!address || typeof window === 'undefined') return;
     const savedTasks = localStorage.getItem(`tasks_${address}`);
     if (savedTasks) {
       setTasks(JSON.parse(savedTasks));
@@ -58,8 +57,7 @@ export function TaskManager({ network }: TaskManagerProps) {
   };
 
   const saveTasks = (newTasks: Task[]) => {
-    if (!address) return;
-    
+    if (!address || typeof window === 'undefined') return;
     localStorage.setItem(`tasks_${address}`, JSON.stringify(newTasks));
     setTasks(newTasks);
   };

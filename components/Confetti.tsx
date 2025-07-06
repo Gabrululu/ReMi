@@ -36,7 +36,7 @@ export function Confetti({ isActive, onComplete }: ConfettiProps) {
     // Create confetti pieces
     const newPieces: ConfettiPiece[] = Array.from({ length: 50 }, (_, i) => ({
       id: i,
-      x: Math.random() * window.innerWidth,
+      x: typeof window !== 'undefined' ? Math.random() * window.innerWidth : 0,
       y: -20,
       rotation: Math.random() * 360,
       scale: Math.random() * 0.5 + 0.5,
@@ -62,7 +62,7 @@ export function Confetti({ isActive, onComplete }: ConfettiProps) {
             ...piece.velocity,
             y: piece.velocity.y + 0.1 // gravity
           }
-        })).filter(piece => piece.y < window.innerHeight + 50);
+        })).filter(piece => typeof window !== 'undefined' ? piece.y < window.innerHeight + 50 : true);
 
         return updated;
       });

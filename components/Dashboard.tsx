@@ -28,11 +28,11 @@ export function Dashboard({ network }: DashboardProps) {
   const [tasks, setTasks] = useState<any[]>([]);
 
   useEffect(() => {
-    if (address) {
+    if (typeof window !== 'undefined' && address) {
       loadUserStats();
       loadTasks();
     }
-  }, [address, network]);
+  }, [address]);
 
   const loadUserStats = async () => {
     if (!address) return;
@@ -50,8 +50,7 @@ export function Dashboard({ network }: DashboardProps) {
   };
 
   const loadTasks = () => {
-    if (!address) return;
-    
+    if (!address || typeof window === 'undefined') return;
     const savedTasks = localStorage.getItem(`tasks_${address}`);
     if (savedTasks) {
       setTasks(JSON.parse(savedTasks));

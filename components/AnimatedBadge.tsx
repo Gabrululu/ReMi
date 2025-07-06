@@ -55,6 +55,26 @@ export function AnimatedBadge({
     }
   }, [isHovered, isUnlocked]);
 
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+      `;
+      document.head.appendChild(style);
+      return () => {
+        document.head.removeChild(style);
+      };
+    }
+  }, []);
+
   const progressPercentage = progress && maxProgress ? (progress / maxProgress) * 100 : 0;
 
   return (
@@ -178,19 +198,4 @@ export function AnimatedBadge({
       </div>
     </div>
   );
-}
-
-// Add custom animations to CSS
-const style = document.createElement('style');
-style.textContent = `
-  @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-  }
-  
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-  }
-`;
-document.head.appendChild(style); 
+} 

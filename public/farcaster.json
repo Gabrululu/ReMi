@@ -1,0 +1,26 @@
+{
+  "name": "ReMi - Social Agenda Web3",
+  "description": "Tu agenda social con recompensas Web3, recordatorios y gamificación",
+  "icon": "/icon.png",
+  "splash": {
+    "image": "/splash.png",
+    "backgroundColor": "#1e293b"
+  },
+  "url": "https://remi-app.vercel.app",
+  "version": "1.0.0",
+  "author": "ReMi Team",
+  "tags": ["productivity", "web3", "social", "rewards", "tasks"],
+  "category": "Productivity",
+  "permissions": [
+    "ethereum",
+    "notifications"
+  ],
+  "features": [
+    "Task Management",
+    "Weekly Goals", 
+    "Achievements",
+    "Web3 Rewards",
+    "Calendar View",
+    "Analytics"
+  ]
+} 

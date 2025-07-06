@@ -1,0 +1,67 @@
+{
+  "name": "ReMi - Social Agenda Web3",
+  "short_name": "ReMi",
+  "description": "Tu agenda social con recompensas Web3, recordatorios y gamificación",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e293b",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait",
+  "scope": "/",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png", 
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "social", "utilities"],
+  "screenshots": [
+    {
+      "src": "/screenshot-1.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/screenshot-2.png", 
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Nueva Tarea",
+      "short_name": "Tarea",
+      "description": "Crear una nueva tarea",
+      "url": "/?action=new-task",
+      "icons": [
+        {
+          "src": "/icon-task.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Nueva Meta",
+      "short_name": "Meta", 
+      "description": "Crear una nueva meta semanal",
+      "url": "/?action=new-goal",
+      "icons": [
+        {
+          "src": "/icon-goal.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+} 

@@ -1,4 +1,4 @@
-import Navbar from '@/components/Navbar';
+import Navbar from '@/components/NavbarNew';
 import TaskForm from '@/components/TaskForm';
 
 export default function NewTaskPage() {

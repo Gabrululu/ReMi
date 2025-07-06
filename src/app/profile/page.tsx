@@ -1,7 +1,7 @@
 'use client';
 
 import { useAccount } from 'wagmi';
-import Navbar from '@/components/Navbar';
+import Navbar from '@/components/NavbarNew';
 
 export default function ProfilePage() {
   const { address } = useAccount();

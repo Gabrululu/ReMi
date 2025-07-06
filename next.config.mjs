@@ -1,11 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    experimental:{
-        appDir: true,
-    },
-    images: {
-        domains: ['cdn.builder.io']
-    }
+  images: {
+    domains: ['cdn.builder.io']
+  }
 };
 
-export default nextConfig;
+export default nextConfig; 

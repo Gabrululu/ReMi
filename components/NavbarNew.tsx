@@ -1,11 +1,21 @@
 'use client';
 
-import { WalletDefault } from '@coinbase/onchainkit/wallet';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAccount, useConnect, useDisconnect } from 'wagmi';
 
-export default function Navbar() {
+export default function NavbarNew() {
   const pathname = usePathname();
+  const { address, isConnected } = useAccount();
+  const { connect, connectors } = useConnect();
+  const { disconnect } = useDisconnect();
+
+  const handleConnect = () => {
+    const connector = connectors[0];
+    if (connector) {
+      connect({ connector });
+    }
+  };
 
   return (
     <nav className="bg-white shadow-lg border-b">
@@ -41,10 +51,24 @@ export default function Navbar() {
             >
               Perfil
             </Link>
-            <WalletDefault />
+            {isConnected ? (
+              <button
+                onClick={() => disconnect()}
+                className="px-4 py-2 bg-red-500 text-white rounded-md text-sm font-medium hover:bg-red-600"
+              >
+                Desconectar
+              </button>
+            ) : (
+              <button
+                onClick={handleConnect}
+                className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600"
+              >
+                Conectar
+              </button>
+            )}
           </div>
         </div>
       </div>
     </nav>
   );
-}
+} 

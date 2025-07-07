@@ -43,18 +43,13 @@ export function TaskManager({ network }: TaskManagerProps) {
   });
 
   useEffect(() => {
-    if (address) {
-      loadTasks();
+    if (address && typeof window !== 'undefined') {
+      const savedTasks = localStorage.getItem(`tasks_${address}`);
+      if (savedTasks) {
+        setTasks(JSON.parse(savedTasks));
+      }
     }
   }, [address]);
-
-  const loadTasks = () => {
-    if (!address || typeof window === 'undefined') return;
-    const savedTasks = localStorage.getItem(`tasks_${address}`);
-    if (savedTasks) {
-      setTasks(JSON.parse(savedTasks));
-    }
-  };
 
   const saveTasks = (newTasks: Task[]) => {
     if (!address || typeof window === 'undefined') return;

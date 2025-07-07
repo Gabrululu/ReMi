@@ -41,18 +41,13 @@ export function WeeklyGoals({ network }: WeeklyGoalsProps) {
   });
 
   useEffect(() => {
-    if (address) {
-      loadGoals();
+    if (address && typeof window !== 'undefined') {
+      const savedGoals = localStorage.getItem(`goals_${address}`);
+      if (savedGoals) {
+        setGoals(JSON.parse(savedGoals));
+      }
     }
   }, [address]);
-
-  const loadGoals = () => {
-    if (!address || typeof window === 'undefined') return;
-    const savedGoals = localStorage.getItem(`goals_${address}`);
-    if (savedGoals) {
-      setGoals(JSON.parse(savedGoals));
-    }
-  };
 
   const saveGoals = (newGoals: Goal[]) => {
     if (!address || typeof window === 'undefined') return;

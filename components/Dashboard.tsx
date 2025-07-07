@@ -30,7 +30,10 @@ export function Dashboard({ network }: DashboardProps) {
   useEffect(() => {
     if (typeof window !== 'undefined' && address) {
       loadUserStats();
-      loadTasks();
+      const savedTasks = localStorage.getItem(`tasks_${address}`);
+      if (savedTasks) {
+        setTasks(JSON.parse(savedTasks));
+      }
     }
   }, [address]);
 
@@ -46,14 +49,6 @@ export function Dashboard({ network }: DashboardProps) {
       console.error('Error loading user stats:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const loadTasks = () => {
-    if (!address || typeof window === 'undefined') return;
-    const savedTasks = localStorage.getItem(`tasks_${address}`);
-    if (savedTasks) {
-      setTasks(JSON.parse(savedTasks));
     }
   };
 

@@ -5,6 +5,7 @@ import { ConnectWallet } from '../../components/ConnectWallet';
 import { WalletInstructions } from '../../components/WalletInstructions';
 import { ThemeToggle } from '../../components/ThemeToggle';
 import { Dashboard } from '../../components/Dashboard';
+import { FarcasterDashboard } from '../../components/FarcasterDashboard';
 import { useAccount } from 'wagmi';
 import { FarcasterWrapper } from '../../components/FarcasterWrapper';
 
@@ -103,7 +104,40 @@ function HomePageContent() {
             </>
           ) : (
             /* Dashboard when connected */
-            <Dashboard network={network} />
+            <div className="space-y-6">
+              <div className="flex justify-center space-x-4 mb-6">
+                <button
+                  onClick={() => setNetwork('baseSepolia')}
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    network === 'baseSepolia'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  Base Sepolia
+                </button>
+                <button
+                  onClick={() => setNetwork('celoAlfajores')}
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    network === 'celoAlfajores'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  Celo Alfajores
+                </button>
+              </div>
+              
+              <Dashboard network={network} />
+              
+              {/* Farcaster Dashboard */}
+              <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">
+                  🚀 Integración con Farcaster
+                </h2>
+                <FarcasterDashboard />
+              </div>
+            </div>
           )}
         </div>
       </div>

@@ -2,6 +2,7 @@
 
 import { useAccount } from 'wagmi';
 import Navbar from '@/components/NavbarNew';
+import { UserProfile } from '@/components/UserProfile';
 
 export default function ProfilePage() {
   const { address } = useAccount();
@@ -24,6 +25,11 @@ export default function ProfilePage() {
       
       <main className="max-w-4xl mx-auto p-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">👤 Perfil Web3</h1>
+        
+        {/* Perfil de Usuario de Farcaster */}
+        <div className="mb-8">
+          <UserProfile />
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Wallet Info */}

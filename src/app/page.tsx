@@ -10,7 +10,6 @@ import { FarcasterWrapper } from '../../components/FarcasterWrapper';
 
 // Disable SSR for this page to avoid Farcaster SDK issues
 export const dynamic = 'force-dynamic';
-export const revalidate = false;
 
 function HomePageContent() {
   const [showInstructions, setShowInstructions] = useState(false);

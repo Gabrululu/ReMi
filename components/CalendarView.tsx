@@ -137,7 +137,7 @@ export function CalendarView({ tasks, onDateSelect, onTaskClick }: CalendarViewP
       );
     }
     
-    return days;
+    return days.length > 0 ? days : null;
   };
 
   const renderWeekView = () => {
@@ -201,7 +201,7 @@ export function CalendarView({ tasks, onDateSelect, onTaskClick }: CalendarViewP
       );
     }
     
-    return weekDays;
+    return weekDays.length > 0 ? weekDays : null;
   };
 
   return (

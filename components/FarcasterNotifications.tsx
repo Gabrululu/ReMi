@@ -1,7 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Bell, Send, CheckCircle, AlertCircle } from 'lucide-react';
+
+// Declaración de tipos para el SDK de Farcaster
+declare global {
+  interface Window {
+    farcasterSDK?: {
+      actions?: {
+        ready?: () => void;
+      };
+    };
+  }
+}
 
 interface FarcasterNotificationsProps {
   onNotificationSent?: () => void;
@@ -11,9 +22,14 @@ export function FarcasterNotifications({ onNotificationSent }: FarcasterNotifica
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const sendNotification = async () => {
-    if (!message.trim() || typeof window === 'undefined' || !window.farcasterSDK) {
+    if (!isClient || !message.trim() || typeof window === 'undefined' || !(window as any).farcasterSDK) {
       setStatus('error');
       return;
     }
@@ -23,8 +39,8 @@ export function FarcasterNotifications({ onNotificationSent }: FarcasterNotifica
 
     try {
       // Inicializar el SDK si no está listo
-      if (window.farcasterSDK?.actions?.ready) {
-        window.farcasterSDK.actions.ready();
+      if ((window as any).farcasterSDK?.actions?.ready) {
+        (window as any).farcasterSDK.actions.ready();
       }
 
       // Simular envío de notificación (el SDK real no tiene este método)
@@ -46,6 +62,11 @@ export function FarcasterNotifications({ onNotificationSent }: FarcasterNotifica
     e.preventDefault();
     sendNotification();
   };
+
+  // No renderizar hasta que estemos en el cliente
+  if (!isClient) {
+    return null;
+  }
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">

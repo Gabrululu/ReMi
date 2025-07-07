@@ -18,8 +18,15 @@ export function MiniAppDetector() {
     isMiniApp: false
   });
   const [loading, setLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isClient) return;
+
     const detectMiniAppContext = async () => {
       if (typeof window === 'undefined') return;
 
@@ -33,13 +40,13 @@ export function MiniAppDetector() {
                            window.navigator.userAgent.includes('Farcaster') ||
                            neynarContext === 'mini-app';
 
-      if (isInFarcaster && (window.farcasterSDK || isSDKLoaded)) {
+      if (isInFarcaster && ((window as any).farcasterSDK || isSDKLoaded)) {
         miniAppContext.isMiniApp = true;
-        miniAppContext.context = neynarContext || window.farcasterSDK?.context || 'mini-app';
+        miniAppContext.context = neynarContext || (window as any).farcasterSDK?.context || 'mini-app';
 
         // Intentar obtener información del usuario
         try {
-          const response = await window.farcasterSDK.actions.fetch('/api/me');
+          const response = await (window as any).farcasterSDK.actions.fetch('/api/me');
           if (response.ok) {
             const userData = await response.json();
             miniAppContext.fid = userData.fid?.toString();
@@ -50,9 +57,9 @@ export function MiniAppDetector() {
         }
 
         // Intentar obtener la dirección de la wallet
-        if (window.farcasterSDK.wallet?.getAddress) {
+        if ((window as any).farcasterSDK.wallet?.getAddress) {
           try {
-            const walletAddress = await window.farcasterSDK.wallet.getAddress();
+            const walletAddress = await (window as any).farcasterSDK.wallet.getAddress();
             miniAppContext.walletAddress = walletAddress;
           } catch (error) {
             console.log('No se pudo obtener la dirección de la wallet:', error);
@@ -66,7 +73,7 @@ export function MiniAppDetector() {
 
     // Esperar a que el SDK se cargue
     const checkSDK = () => {
-      if (window.farcasterSDK) {
+      if ((window as any).farcasterSDK) {
         detectMiniAppContext();
       } else {
         setTimeout(checkSDK, 100);
@@ -74,7 +81,12 @@ export function MiniAppDetector() {
     };
 
     checkSDK();
-  }, []);
+  }, [isClient, isSDKLoaded, neynarContext]);
+
+  // No renderizar hasta que estemos en el cliente
+  if (!isClient) {
+    return null;
+  }
 
   if (loading) {
     return (

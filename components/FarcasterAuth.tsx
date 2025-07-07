@@ -1,59 +1,71 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useNeynarMiniApp } from '../hooks/useNeynarMiniApp';
-import { useAccount } from 'wagmi';
+import React, { useState, useEffect } from 'react';
+
+interface FarcasterUser {
+  fid: number;
+  username: string;
+  displayName: string;
+  avatar: string;
+  verified: boolean;
+}
 
 interface FarcasterAuthProps {
-  children: React.ReactNode;
+  children: (user: FarcasterUser | null, isAuthenticated: boolean, login: () => void) => React.ReactNode;
 }
 
 export function FarcasterAuth({ children }: FarcasterAuthProps) {
-  const { address, isConnected } = useAccount();
-  const { user: farcasterUser, loading: farcasterLoading, error: farcasterError, login: farcasterLogin, isAuthenticated: isFarcasterAuthenticated, isSDKLoaded, context } = useNeynarMiniApp();
+  const [user, setUser] = useState<FarcasterUser | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
-  // Auto-conectar Farcaster cuando la wallet está conectada o cuando el SDK de Neynar está listo
   useEffect(() => {
-    if ((isConnected && address && !isFarcasterAuthenticated && !farcasterLoading) || 
-        (isSDKLoaded && context === 'mini-app' && !isFarcasterAuthenticated && !farcasterLoading)) {
-      console.log('Iniciando autenticación de Farcaster Mini App...');
-      farcasterLogin();
-    }
-  }, [isConnected, address, isFarcasterAuthenticated, farcasterLoading, farcasterLogin, isSDKLoaded, context]);
+    setIsClient(true);
+  }, []);
 
-  // Mostrar estado de autenticación
-  const renderAuthStatus = () => {
-    if (farcasterLoading) {
-      return (
-        <div className="fixed top-4 right-4 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg z-50">
-          🔄 Conectando con Farcaster...
-        </div>
+  const isAuthenticated = !!user;
+
+  const login = async () => {
+    if (!isClient || typeof window === 'undefined') {
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Verificar si estamos en contexto de Farcaster
+      const isInFarcaster = typeof window !== 'undefined' && (
+        window.location.href.includes('farcaster.xyz') || 
+        window.navigator.userAgent.includes('Farcaster')
       );
-    }
 
-    if (farcasterError) {
-      return (
-        <div className="fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50">
-          ❌ Error: {farcasterError}
-        </div>
-      );
+      if (isInFarcaster) {
+        // Simular datos de usuario para Farcaster
+        const mockUser: FarcasterUser = {
+          fid: 12345,
+          username: 'usuario_remi',
+          displayName: 'Usuario ReMi',
+          avatar: 'https://via.placeholder.com/150',
+          verified: true
+        };
+        setUser(mockUser);
+      } else {
+        setError('No estás en un contexto de Farcaster');
+      }
+    } catch (err) {
+      console.error('Error en autenticación de Farcaster:', err);
+      setError('Error al conectar con Farcaster');
+    } finally {
+      setLoading(false);
     }
-
-    if (isConnected && isFarcasterAuthenticated) {
-      return (
-        <div className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50">
-          ✅ Conectado: {farcasterUser?.displayName} (@{farcasterUser?.username})
-        </div>
-      );
-    }
-
-    return null;
   };
 
-  return (
-    <div>
-      {renderAuthStatus()}
-      {children}
-    </div>
-  );
+  // No renderizar nada hasta que estemos en el cliente
+  if (!isClient) {
+    return null;
+  }
+
+  return <>{children(user, isAuthenticated, login)}</>;
 } 

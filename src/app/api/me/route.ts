@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// Forzar que esta ruta sea dinámica para evitar errores de generación estática
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     // Verificar si estamos en un contexto de Farcaster Mini App

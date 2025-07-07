@@ -17,12 +17,31 @@ export function useFarcasterSDK() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') {
+      setIsLoading(false);
+      return;
+    }
+
     let retryCount = 0;
     const maxRetries = 10;
     const retryDelay = 500;
 
     const initializeSDK = async () => {
       try {
+        // Load SDK dynamically
+        if (!window.farcasterSDK) {
+          try {
+            // @ts-ignore - Dynamic import from CDN
+            const sdkModule = await import('https://esm.sh/@farcaster/miniapp-sdk');
+            window.farcasterSDK = sdkModule.sdk;
+            console.log('Farcaster SDK loaded successfully');
+          } catch (importError) {
+            console.error('Error importing Farcaster SDK:', importError);
+            throw importError;
+          }
+        }
+
         // Check if SDK is available
         if (window.farcasterSDK?.actions?.ready) {
           console.log('Farcaster SDK found, calling ready()');

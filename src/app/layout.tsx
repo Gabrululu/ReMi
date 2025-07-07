@@ -117,16 +117,7 @@ export default function RootLayout({
             `,
           }}
         />
-        <script type="module">
-          {`
-            import { sdk } from 'https://esm.sh/@farcaster/miniapp-sdk'
-            
-            // Make SDK available globally
-            window.farcasterSDK = sdk;
-            
-            console.log('Farcaster SDK loaded successfully');
-          `}
-        </script>
+
         
         {/* Additional Farcaster Meta Tags */}
         <meta property="og:type" content="website" />

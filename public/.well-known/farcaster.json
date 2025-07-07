@@ -1,28 +1,21 @@
 {
-    "miniapp": {
+    "accountAssociation": {
+      "header": "...",
+      "payload": "...",
+      "signature": "..."
+    },
+    "frame": {
       "version": "1",
       "name": "ReMi - Social Agenda Web3",
       "description": "Tu agenda social con recompensas Web3, recordatorios y gamificación",
       "iconUrl": "https://re-mi.vercel.app/icon.png",
-      "splash": {
-        "image": "https://re-mi.vercel.app/splash.png",
-        "backgroundColor": "#1e293b"
-      },
+      "splashImageUrl": "https://re-mi.vercel.app/splash.png",
+      "splashBackgroundColor": "#1e293b",
       "homeUrl": "https://re-mi.vercel.app/",
       "author": "ReMi Team",
       "tags": ["productivity", "web3", "social", "rewards", "tasks"],
-      "category": "Productivity",
-      "permissions": [
-        "ethereum",
-        "notifications"
-      ],
-      "features": [
-        "Task Management",
-        "Weekly Goals", 
-        "Achievements",
-        "Web3 Rewards",
-        "Calendar View",
-        "Analytics"
-      ]
+      "primaryCategory": "productivity",
+      "permissions": ["ethereum", "notifications"]
     }
   }
+  

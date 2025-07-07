@@ -1,24 +1,21 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ConnectWallet } from '../../components/ConnectWallet';
 import { WalletInstructions } from '../../components/WalletInstructions';
 import { ThemeToggle } from '../../components/ThemeToggle';
 import { Dashboard } from '../../components/Dashboard';
 import { useAccount } from 'wagmi';
-import { useFarcasterSDK } from '../../hooks/useFarcasterSDK';
+import { FarcasterWrapper } from '../../components/FarcasterWrapper';
 
 // Disable SSR for this page to avoid Farcaster SDK issues
 export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = false;
 
-export default function HomePage() {
+function HomePageContent() {
   const [showInstructions, setShowInstructions] = useState(false);
   const { isConnected } = useAccount();
   const [network, setNetwork] = useState<'baseSepolia' | 'celoAlfajores'>('baseSepolia');
-  
-  // Use Farcaster SDK hook
-  const { isReady: isAppReady, isLoading, error } = useFarcasterSDK();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4 transition-all duration-300">
@@ -32,20 +29,7 @@ export default function HomePage() {
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-300">⏰ ReMi</h1>
             <p className="text-gray-600 dark:text-gray-300 text-lg transition-colors duration-300">Tu Agenda Social Web3</p>
             
-            {/* Farcaster SDK Status (for debugging) */}
-            {process.env.NODE_ENV === 'development' && (
-              <div className="mt-2 text-xs">
-                <span className={`inline-block px-2 py-1 rounded ${
-                  isLoading ? 'bg-yellow-100 text-yellow-800' :
-                  error ? 'bg-red-100 text-red-800' :
-                  isAppReady ? 'bg-green-100 text-green-800' :
-                  'bg-gray-100 text-gray-800'
-                }`}>
-                  SDK: {isLoading ? 'Loading...' : error ? 'Error' : isAppReady ? 'Ready' : 'Unknown'}
-                </span>
-                {error && <div className="text-red-600 mt-1">{error}</div>}
-              </div>
-            )}
+
           </div>
           
           {!isConnected ? (
@@ -125,5 +109,13 @@ export default function HomePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <FarcasterWrapper>
+      <HomePageContent />
+    </FarcasterWrapper>
   );
 }

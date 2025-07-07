@@ -53,10 +53,10 @@ export default function RootLayout({
           name="fc:miniapp" 
           content={JSON.stringify({
             accountAssociation: {
-              // Aquí van los valores firmados que obtuviste de Farcaster
-              header: "eyJmaWQiOjQ3MzYyNiwidHlwZSI6ImF1dGgiLCJrZXkiOiIweGUzNzRDZDdDRGFDQmRkYzlmMjhFQkIzMjU2NTU4Mjk0ZWJkMEE0RUIifQ",
-              payload: "eyJkb21haW4iOiJyZS1taS52ZXJjZWwuYXBwIn0", 
-              signature: "mHa+YYxvJkorqP5CnUAE6O64m9QNsRW9/iPRUpGynNBBoQ5ZVW5+B+AN8mQzaf1x5uswsJktFLaPM/7PMz7+Ohw=",               
+              // Valores desde variables de entorno para seguridad
+              header: process.env.NEXT_PUBLIC_FARCASTER_HEADER || "",
+              payload: process.env.NEXT_PUBLIC_FARCASTER_PAYLOAD || "", 
+              signature: process.env.NEXT_PUBLIC_FARCASTER_SIGNATURE || "",               
             },
             miniapp: {
               version: "1",
@@ -83,7 +83,6 @@ export default function RootLayout({
                 "Calendar View",
                 "Analytics"
               ],
-              // Nuevos campos agregados
               screenshotUrls: [
                 "https://re-mi.vercel.app/screenshot.png"
               ],
@@ -92,12 +91,7 @@ export default function RootLayout({
               splashImageUrl: "https://re-mi.vercel.app/splash.png",
               splashBackgroundColor: "#1e293b",
               castShareUrl: "https://farcaster.xyz/miniapps/Nf9G0Et26Mk9/remi---your-social-web3-schedule"
-            },
-            // Campos requeridos para Frames
-            version: "next",
-            imageUrl: "https://re-mi.vercel.app/splash.png",
-            button: "Abrir ReMi",
-            aspectRatio: "1.91:1"
+            }
           })}
         />
         <script

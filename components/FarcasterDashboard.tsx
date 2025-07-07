@@ -4,6 +4,7 @@ import { useFarcasterAuth } from '../hooks/useFarcasterAuth';
 import { useAccount } from 'wagmi';
 import { UserProfile } from './UserProfile';
 import { FarcasterNotifications } from './FarcasterNotifications';
+import { MiniAppDetector } from './MiniAppDetector';
 import { Users, Bell, Share2, Trophy, Calendar, Target } from 'lucide-react';
 
 export function FarcasterDashboard() {
@@ -59,6 +60,9 @@ export function FarcasterDashboard() {
           Tu agenda social con recompensas Web3 integrada con Farcaster
         </p>
       </div>
+
+      {/* Mini App Detector */}
+      <MiniAppDetector />
 
       {/* Estado de conexión */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

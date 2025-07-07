@@ -146,9 +146,5 @@ function HomePageContent() {
 }
 
 export default function HomePage() {
-  return (
-    <FarcasterWrapper>
-      <HomePageContent />
-    </FarcasterWrapper>
-  );
+  return <HomePageContent />;
 }

@@ -1,21 +1,20 @@
 {
     "accountAssociation": {
-      "header": "...",
-      "payload": "...",
-      "signature": "..."
+      "header": "eyJmaWQiOjQ3MzYyNiwidHlwZSI6ImF1dGgiLCJrZXkiOiIweGUzNzRDZDdDRGFDQmRkYzlmMjhFQkIzMjU2NTU4Mjk0ZWJkMEE0RUIifQ",
+      "payload": "eyJkb21haW4iOiJyZS1taS52ZXJjZWwuYXBwIn0",
+      "signature": "mHa+YYxvJkorqP5CnUAE6O64m9QNsRW9/iPRUpGynNBBoQ5ZVW5+B+AN8mQzaf1x5uswsJktFLaPM/7PMz7+Ohw="
     },
     "frame": {
       "version": "1",
-      "name": "ReMi - Social Agenda Web3",
-      "description": "Tu agenda social con recompensas Web3, recordatorios y gamificación",
+      "name": "Example Frame",
       "iconUrl": "https://re-mi.vercel.app/icon.png",
+      "homeUrl": "https://re-mi.vercel.app",
+      "imageUrl": "https://re-mi.vercel.app/image.png",
+      "buttonTitle": "Check this out",
       "splashImageUrl": "https://re-mi.vercel.app/splash.png",
-      "splashBackgroundColor": "#1e293b",
-      "homeUrl": "https://re-mi.vercel.app/",
-      "author": "ReMi Team",
-      "tags": ["productivity", "web3", "social", "rewards", "tasks"],
-      "primaryCategory": "productivity",
-      "permissions": ["ethereum", "notifications"]
+      "splashBackgroundColor": "#eeccff",
+      "webhookUrl": "https://re-mi.vercel.app/api/webhook"
     }
   }
+  
   

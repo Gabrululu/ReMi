@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { CheckCircle, AlertCircle, Info } from 'lucide-react';
+import { useMiniApp } from '@neynar/react';
 
 interface MiniAppContext {
   isMiniApp: boolean;
@@ -12,6 +13,7 @@ interface MiniAppContext {
 }
 
 export function MiniAppDetector() {
+  const { isSDKLoaded, context: neynarContext } = useMiniApp();
   const [context, setContext] = useState<MiniAppContext>({
     isMiniApp: false
   });
@@ -25,14 +27,15 @@ export function MiniAppDetector() {
         isMiniApp: false
       };
 
-      // Detectar si estamos en un contexto de Mini App
+      // Detectar si estamos en un contexto de Mini App usando Neynar
       const isInFarcaster = window.location.href.includes('farcaster.xyz') || 
                            window.location.href.includes('miniapps') ||
-                           window.navigator.userAgent.includes('Farcaster');
+                           window.navigator.userAgent.includes('Farcaster') ||
+                           neynarContext === 'mini-app';
 
-      if (isInFarcaster && window.farcasterSDK) {
+      if (isInFarcaster && (window.farcasterSDK || isSDKLoaded)) {
         miniAppContext.isMiniApp = true;
-        miniAppContext.context = window.farcasterSDK.context;
+        miniAppContext.context = neynarContext || window.farcasterSDK?.context || 'mini-app';
 
         // Intentar obtener información del usuario
         try {

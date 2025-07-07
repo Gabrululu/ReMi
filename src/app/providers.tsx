@@ -2,11 +2,14 @@
 
 import type { ReactNode } from 'react';
 import { AppKitProvider } from '../../lib/appkit-config';
+import { MiniAppProvider } from '@neynar/react';
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
-    <AppKitProvider>
-      {children}
-    </AppKitProvider>
+    <MiniAppProvider analyticsEnabled={true}>
+      <AppKitProvider>
+        {children}
+      </AppKitProvider>
+    </MiniAppProvider>
   );
 }

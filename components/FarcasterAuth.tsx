@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useFarcasterAuth } from '../hooks/useFarcasterAuth';
+import { useNeynarMiniApp } from '../hooks/useNeynarMiniApp';
 import { useAccount } from 'wagmi';
 
 interface FarcasterAuthProps {
@@ -10,15 +10,16 @@ interface FarcasterAuthProps {
 
 export function FarcasterAuth({ children }: FarcasterAuthProps) {
   const { address, isConnected } = useAccount();
-  const { user: farcasterUser, loading: farcasterLoading, error: farcasterError, login: farcasterLogin, isAuthenticated: isFarcasterAuthenticated } = useFarcasterAuth();
+  const { user: farcasterUser, loading: farcasterLoading, error: farcasterError, login: farcasterLogin, isAuthenticated: isFarcasterAuthenticated, isSDKLoaded, context } = useNeynarMiniApp();
 
-  // Auto-conectar Farcaster cuando la wallet está conectada
+  // Auto-conectar Farcaster cuando la wallet está conectada o cuando el SDK de Neynar está listo
   useEffect(() => {
-    if (isConnected && address && !isFarcasterAuthenticated && !farcasterLoading) {
-      console.log('Wallet conectada, iniciando autenticación de Farcaster...');
+    if ((isConnected && address && !isFarcasterAuthenticated && !farcasterLoading) || 
+        (isSDKLoaded && context === 'mini-app' && !isFarcasterAuthenticated && !farcasterLoading)) {
+      console.log('Iniciando autenticación de Farcaster Mini App...');
       farcasterLogin();
     }
-  }, [isConnected, address, isFarcasterAuthenticated, farcasterLoading, farcasterLogin]);
+  }, [isConnected, address, isFarcasterAuthenticated, farcasterLoading, farcasterLogin, isSDKLoaded, context]);
 
   // Mostrar estado de autenticación
   const renderAuthStatus = () => {

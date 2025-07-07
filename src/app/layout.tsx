@@ -50,47 +50,19 @@ export default function RootLayout({
     <html lang="es" suppressHydrationWarning>
       <head>
         <meta 
-          name="fc:miniapp" 
+          name="fc:frame" 
           content={JSON.stringify({
-            accountAssociation: {
-              // Valores desde variables de entorno para seguridad
-              header: process.env.NEXT_PUBLIC_FARCASTER_HEADER || "",
-              payload: process.env.NEXT_PUBLIC_FARCASTER_PAYLOAD || "", 
-              signature: process.env.NEXT_PUBLIC_FARCASTER_SIGNATURE || "",               
-            },
-            miniapp: {
-              version: "1",
-              name: "ReMi - Social Agenda Web3",
-              description: "Tu agenda social con recompensas Web3, recordatorios y gamificación",
-              iconUrl: "https://re-mi.vercel.app/icon.png",
-              splash: {
-                image: "https://re-mi.vercel.app/splash.png",
-                backgroundColor: "#1e293b"
-              },
-              homeUrl: "https://re-mi.vercel.app/",
-              author: "ReMi Team",
-              tags: ["productivity", "web3", "social", "rewards", "tasks"],
-              category: "Productivity",
-              permissions: [
-                "ethereum",
-                "notifications"
-              ],
-              features: [
-                "Task Management",
-                "Weekly Goals", 
-                "Achievements",
-                "Web3 Rewards",
-                "Calendar View",
-                "Analytics"
-              ],
-              screenshotUrls: [
-                "https://re-mi.vercel.app/screenshot.png"
-              ],
-              imageUrl: "https://re-mi.vercel.app/image.png",
-              heroImageUrl: "https://re-mi.vercel.app/hero.png",
-              splashImageUrl: "https://re-mi.vercel.app/splash.png",
-              splashBackgroundColor: "#1e293b",
-              castShareUrl: "https://farcaster.xyz/miniapps/Nf9G0Et26Mk9/remi---your-social-web3-schedule"
+            version: "next",
+            imageUrl: "https://re-mi.vercel.app/hero.png",
+            button: {
+              title: "🚀 Abrir ReMi",
+              action: {
+                type: "launch_frame",
+                name: "ReMi - Social Agenda Web3",
+                url: "https://re-mi.vercel.app",
+                splashImageUrl: "https://re-mi.vercel.app/splash.png",
+                splashBackgroundColor: "#1e293b"
+              }
             }
           })}
         />
@@ -142,8 +114,7 @@ export default function RootLayout({
         <meta property="fc:frame:input:text" content="false" />
         <meta property="fc:frame:state" content="initial" />
         
-        {/* Farcaster SDK - Load only on client */}
-        <script src="/farcaster-sdk.js" defer />
+        {/* Neynar Mini App SDK is loaded via MiniAppProvider */}
       </head>
       <body className={inter.className}>
         <Providers>

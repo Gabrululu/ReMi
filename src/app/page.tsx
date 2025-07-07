@@ -1,12 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ConnectWallet } from '../../components/ConnectWallet';
 import { WalletInstructions } from '../../components/WalletInstructions';
 import { ThemeToggle } from '../../components/ThemeToggle';
 import { Dashboard } from '../../components/Dashboard';
 import { useAccount } from 'wagmi';
 import { useFarcasterSDK } from '../../hooks/useFarcasterSDK';
+
+// Disable SSR for this page to avoid Farcaster SDK issues
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default function HomePage() {
   const [showInstructions, setShowInstructions] = useState(false);

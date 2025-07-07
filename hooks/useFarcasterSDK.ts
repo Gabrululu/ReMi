@@ -11,8 +11,6 @@ declare global {
   }
 }
 
-
-
 export function useFarcasterSDK() {
   const [isReady, setIsReady] = useState(false);
   const [isLoading, setIsLoading] = useState(true);

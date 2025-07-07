@@ -7,8 +7,37 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'ReMi - Social Agenda Web3',
-  description: 'Tu agenda social con recompensas Web3',
+  description: 'Tu agenda social con recompensas Web3, recordatorios y gamificación',
   manifest: '/manifest.json',
+  openGraph: {
+    title: 'ReMi - Social Agenda Web3',
+    description: 'Tu agenda social con recompensas Web3, recordatorios y gamificación',
+    url: 'https://re-mi.vercel.app/',
+    siteName: 'ReMi',
+    images: [
+      {
+        url: 'https://re-mi.vercel.app/hero.png',
+        width: 1200,
+        height: 630,
+        alt: 'ReMi - Social Agenda Web3',
+      },
+    ],
+    locale: 'es_ES',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'ReMi - Social Agenda Web3',
+    description: 'Tu agenda social con recompensas Web3, recordatorios y gamificación',
+    images: ['https://re-mi.vercel.app/hero.png'],
+    creator: '@remi_app',
+  },
+  other: {
+    'fc:frame': 'vNext',
+    'fc:frame:image': 'https://re-mi.vercel.app/hero.png',
+    'fc:frame:button:1': 'Abrir ReMi',
+    'fc:frame:post_url': 'https://re-mi.vercel.app/',
+  },
 };
 
 export default function RootLayout({
@@ -93,6 +122,30 @@ export default function RootLayout({
           src="https://unpkg.com/@farcaster/miniapp-sdk@0.1.4/dist/index.js"
           async
         />
+        
+        {/* Additional Farcaster Meta Tags */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="ReMi - Social Agenda Web3" />
+        <meta property="og:description" content="Tu agenda social con recompensas Web3, recordatorios y gamificación" />
+        <meta property="og:url" content="https://re-mi.vercel.app/" />
+        <meta property="og:image" content="https://re-mi.vercel.app/hero.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:site_name" content="ReMi" />
+        <meta property="og:locale" content="es_ES" />
+        
+        {/* Twitter Card Meta Tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="ReMi - Social Agenda Web3" />
+        <meta name="twitter:description" content="Tu agenda social con recompensas Web3, recordatorios y gamificación" />
+        <meta name="twitter:image" content="https://re-mi.vercel.app/hero.png" />
+        <meta name="twitter:creator" content="@remi_app" />
+        
+        {/* Farcaster Frame Meta Tags */}
+        <meta property="fc:frame" content="vNext" />
+        <meta property="fc:frame:image" content="https://re-mi.vercel.app/hero.png" />
+        <meta property="fc:frame:button:1" content="Abrir ReMi" />
+        <meta property="fc:frame:post_url" content="https://re-mi.vercel.app/" />
       </head>
       <body className={inter.className}>
         <Providers>

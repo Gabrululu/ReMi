@@ -11,6 +11,8 @@ declare global {
   }
 }
 
+
+
 export function useFarcasterSDK() {
   const [isReady, setIsReady] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,8 +34,8 @@ export function useFarcasterSDK() {
         // Load SDK dynamically
         if (!window.farcasterSDK) {
           try {
-            // @ts-ignore - Dynamic import from CDN
-            const sdkModule = await import('https://esm.sh/@farcaster/miniapp-sdk');
+            // Import from installed package
+            const sdkModule = await import('@farcaster/miniapp-sdk');
             window.farcasterSDK = sdkModule.sdk;
             console.log('Farcaster SDK loaded successfully');
           } catch (importError) {

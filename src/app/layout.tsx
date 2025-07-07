@@ -117,34 +117,16 @@ export default function RootLayout({
             `,
           }}
         />
-        {/* Farcaster Mini App SDK */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // Initialize Farcaster SDK
-              (function() {
-                if (typeof window !== 'undefined') {
-                  // Create a simple ready function
-                  window.farcaster = {
-                    ready: function() {
-                      console.log('Farcaster ready called');
-                      // Dispatch custom event
-                      window.dispatchEvent(new CustomEvent('farcaster-ready'));
-                    },
-                    sdk: {
-                      actions: {
-                        ready: function() {
-                          console.log('Farcaster SDK actions ready called');
-                          window.dispatchEvent(new CustomEvent('farcaster-ready'));
-                        }
-                      }
-                    }
-                  };
-                }
-              })();
-            `
-          }}
-        />
+        <script type="module">
+          {`
+            import { sdk } from 'https://esm.sh/@farcaster/miniapp-sdk'
+            
+            // Make SDK available globally
+            window.farcasterSDK = sdk;
+            
+            console.log('Farcaster SDK loaded successfully');
+          `}
+        </script>
         
         {/* Additional Farcaster Meta Tags */}
         <meta property="og:type" content="website" />

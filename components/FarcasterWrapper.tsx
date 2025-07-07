@@ -25,5 +25,5 @@ export function FarcasterWrapper({ children }: FarcasterWrapperProps) {
     );
   }
 
-  return <>{children}</>;
+  return <div>{children}</div>;
 } 

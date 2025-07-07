@@ -64,8 +64,8 @@ export function FarcasterAuth({ children }: FarcasterAuthProps) {
 
   // No renderizar nada hasta que estemos en el cliente
   if (!isClient) {
-    return null;
+    return <div></div>;
   }
 
-  return <>{children(user, isAuthenticated, login)}</>;
+  return <div>{children(user, isAuthenticated, login)}</div>;
 } 

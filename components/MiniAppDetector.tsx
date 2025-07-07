@@ -85,7 +85,7 @@ export function MiniAppDetector() {
 
   // No renderizar hasta que estemos en el cliente
   if (!isClient) {
-    return null;
+    return <div></div>;
   }
 
   if (loading) {

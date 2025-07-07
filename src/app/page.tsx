@@ -30,17 +30,23 @@ export default function HomePage() {
 
   // Farcaster Mini App ready hook
   useEffect(() => {
+    const handleFarcasterReady = () => {
+      console.log('Farcaster ready event received');
+      setIsAppReady(true);
+    };
+
+    // Listen for custom farcaster ready event
+    window.addEventListener('farcaster-ready', handleFarcasterReady);
+
     // Call ready when the app interface is loaded
     const callReady = () => {
       // Try multiple ways to call ready
       if (window.farcaster?.sdk?.actions?.ready) {
         console.log('Farcaster SDK found, calling sdk.actions.ready()');
         window.farcaster.sdk.actions.ready();
-        setIsAppReady(true);
       } else if ((window.farcaster as any)?.ready) {
         console.log('Farcaster SDK found (legacy), calling ready()');
         (window.farcaster as any).ready();
-        setIsAppReady(true);
       } else {
         console.log('Farcaster SDK not found, retrying...');
         // Retry after a longer delay if SDK is not available
@@ -51,7 +57,10 @@ export default function HomePage() {
     // Initial call with short delay
     const timer = setTimeout(callReady, 100);
     
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('farcaster-ready', handleFarcasterReady);
+    };
   }, []);
 
   return (

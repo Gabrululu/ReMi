@@ -119,8 +119,31 @@ export default function RootLayout({
         />
         {/* Farcaster Mini App SDK */}
         <script
-          src="https://unpkg.com/@farcaster/miniapp-sdk@latest/dist/index.js"
-          async
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Initialize Farcaster SDK
+              (function() {
+                if (typeof window !== 'undefined') {
+                  // Create a simple ready function
+                  window.farcaster = {
+                    ready: function() {
+                      console.log('Farcaster ready called');
+                      // Dispatch custom event
+                      window.dispatchEvent(new CustomEvent('farcaster-ready'));
+                    },
+                    sdk: {
+                      actions: {
+                        ready: function() {
+                          console.log('Farcaster SDK actions ready called');
+                          window.dispatchEvent(new CustomEvent('farcaster-ready'));
+                        }
+                      }
+                    }
+                  };
+                }
+              })();
+            `
+          }}
         />
         
         {/* Additional Farcaster Meta Tags */}
@@ -145,7 +168,9 @@ export default function RootLayout({
         <meta property="fc:frame" content="vNext" />
         <meta property="fc:frame:image" content="https://re-mi.vercel.app/hero.png" />
         <meta property="fc:frame:button:1" content="Abrir ReMi" />
-        <meta property="fc:frame:post_url" content="https://re-mi.vercel.app/" />
+        <meta property="fc:frame:post_url" content="https://re-mi.vercel.app/api/frame" />
+        <meta property="fc:frame:input:text" content="false" />
+        <meta property="fc:frame:state" content="initial" />
       </head>
       <body className={inter.className}>
         <Providers>

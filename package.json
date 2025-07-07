@@ -17,7 +17,7 @@
     "coverage": "hardhat coverage"
   },
   "dependencies": {
-    "@farcaster/miniapp-sdk": "^0.1.4",
+
     "@supabase/supabase-js": "^2.39.0",
     "@tanstack/react-query": "^5.81.5",
     "date-fns": "^3.6.0",

@@ -29,15 +29,31 @@ export function useFarcasterSDK() {
 
     const initializeSDK = async () => {
       try {
-        // Load SDK dynamically
+        // Load SDK dynamically only on client
         if (!window.farcasterSDK) {
           try {
-            // Import from installed package
-            const sdkModule = await import('@farcaster/miniapp-sdk');
-            window.farcasterSDK = sdkModule.sdk;
+            // Use dynamic import with full URL to avoid build issues
+            const script = document.createElement('script');
+            script.type = 'module';
+            script.textContent = `
+              import { sdk } from 'https://esm.sh/@farcaster/miniapp-sdk@0.1.4';
+              window.farcasterSDK = sdk;
+              window.dispatchEvent(new CustomEvent('farcaster-sdk-loaded'));
+            `;
+            document.head.appendChild(script);
+            
+            // Wait for SDK to load
+            await new Promise((resolve, reject) => {
+              const timeout = setTimeout(() => reject(new Error('SDK load timeout')), 5000);
+              window.addEventListener('farcaster-sdk-loaded', () => {
+                clearTimeout(timeout);
+                resolve(true);
+              }, { once: true });
+            });
+            
             console.log('Farcaster SDK loaded successfully');
           } catch (importError) {
-            console.error('Error importing Farcaster SDK:', importError);
+            console.error('Error loading Farcaster SDK:', importError);
             throw importError;
           }
         }

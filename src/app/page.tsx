@@ -28,12 +28,17 @@ export default function HomePage() {
     // Call ready when the app interface is loaded
     const callReady = () => {
       if (window.farcaster) {
+        console.log('Farcaster SDK found, calling ready()');
         window.farcaster.ready();
         setIsAppReady(true);
+      } else {
+        console.log('Farcaster SDK not found, retrying...');
+        // Retry after a longer delay if SDK is not available
+        setTimeout(callReady, 500);
       }
     };
 
-    // Call ready after a short delay to ensure smooth loading
+    // Initial call with short delay
     const timer = setTimeout(callReady, 100);
     
     return () => clearTimeout(timer);

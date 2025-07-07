@@ -24,10 +24,9 @@ export default function RootLayout({
           content={JSON.stringify({
             accountAssociation: {
               // Aquí van los valores firmados que obtuviste de Farcaster
-              address: "0x...", // Reemplaza con tu address
-              payload: "...", // Reemplaza con tu payload
-              signature: "...", // Reemplaza con tu signature
-              timestamp: 1234567890 // Reemplaza con tu timestamp
+              header: "eyJmaWQiOjQ3MzYyNiwidHlwZSI6ImF1dGgiLCJrZXkiOiIweGUzNzRDZDdDRGFDQmRkYzlmMjhFQkIzMjU2NTU4Mjk0ZWJkMEE0RUIifQ",
+              payload: "eyJkb21haW4iOiJyZS1taS52ZXJjZWwuYXBwIn0", 
+              signature: "mHa+YYxvJkorqP5CnUAE6O64m9QNsRW9/iPRUpGynNBBoQ5ZVW5+B+AN8mQzaf1x5uswsJktFLaPM/7PMz7+Ohw=",               
             },
             miniapp: {
               version: "1",
@@ -54,7 +53,12 @@ export default function RootLayout({
                 "Calendar View",
                 "Analytics"
               ]
-            }
+            },
+            // Campos requeridos para Frames
+            version: "next",
+            imageUrl: "https://re-mi.vercel.app/splash.png",
+            button: "Abrir ReMi",
+            aspectRatio: "1.91:1"
           })}
         />
         <script

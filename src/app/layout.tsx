@@ -52,7 +52,16 @@ export default function RootLayout({
                 "Web3 Rewards",
                 "Calendar View",
                 "Analytics"
-              ]
+              ],
+              // Nuevos campos agregados
+              screenshotUrls: [
+                "https://re-mi.vercel.app/screenshot.png"
+              ],
+              imageUrl: "https://re-mi.vercel.app/image.png",
+              heroImageUrl: "https://re-mi.vercel.app/hero.png",
+              splashImageUrl: "https://re-mi.vercel.app/splash.png",
+              splashBackgroundColor: "#1e293b",
+              castShareUrl: "https://farcaster.xyz/miniapps/Nf9G0Et26Mk9/remi---your-social-web3-schedule"
             },
             // Campos requeridos para Frames
             version: "next",

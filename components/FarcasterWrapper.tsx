@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useFarcasterSDK } from '../hooks/useFarcasterSDK';
 
 interface FarcasterWrapperProps {
   children: React.ReactNode;
@@ -9,7 +8,6 @@ interface FarcasterWrapperProps {
 
 export function FarcasterWrapper({ children }: FarcasterWrapperProps) {
   const [isClient, setIsClient] = useState(false);
-  const { isReady, isLoading, error } = useFarcasterSDK();
 
   useEffect(() => {
     setIsClient(true);

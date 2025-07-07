@@ -146,6 +146,9 @@ export default function RootLayout({
         <meta property="fc:frame:post_url" content="https://re-mi.vercel.app/api/frame" />
         <meta property="fc:frame:input:text" content="false" />
         <meta property="fc:frame:state" content="initial" />
+        
+        {/* Farcaster SDK - Load only on client */}
+        <script src="/farcaster-sdk.js" defer />
       </head>
       <body className={inter.className}>
         <Providers>

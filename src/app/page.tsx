@@ -11,8 +11,13 @@ import { useAccount } from 'wagmi';
 declare global {
   interface Window {
     farcaster?: {
-      ready: () => void;
-      disableNativeGestures: () => void;
+      sdk?: {
+        actions: {
+          ready: () => void;
+        };
+      };
+      ready?: () => void; // Legacy method
+      disableNativeGestures?: () => void;
     };
   }
 }
@@ -27,9 +32,14 @@ export default function HomePage() {
   useEffect(() => {
     // Call ready when the app interface is loaded
     const callReady = () => {
-      if (window.farcaster) {
-        console.log('Farcaster SDK found, calling ready()');
-        window.farcaster.ready();
+      // Try multiple ways to call ready
+      if (window.farcaster?.sdk?.actions?.ready) {
+        console.log('Farcaster SDK found, calling sdk.actions.ready()');
+        window.farcaster.sdk.actions.ready();
+        setIsAppReady(true);
+      } else if ((window.farcaster as any)?.ready) {
+        console.log('Farcaster SDK found (legacy), calling ready()');
+        (window.farcaster as any).ready();
         setIsAppReady(true);
       } else {
         console.log('Farcaster SDK not found, retrying...');

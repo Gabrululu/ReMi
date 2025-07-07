@@ -119,7 +119,7 @@ export default function RootLayout({
         />
         {/* Farcaster Mini App SDK */}
         <script
-          src="https://unpkg.com/@farcaster/miniapp-sdk@0.1.4/dist/index.js"
+          src="https://unpkg.com/@farcaster/miniapp-sdk@latest/dist/index.js"
           async
         />
         

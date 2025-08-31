@@ -1,4 +1,3 @@
-import { useMiniApp } from '@neynar/react';
 import { useState, useEffect } from 'react';
 
 interface NeynarUser {
@@ -23,16 +22,32 @@ interface UseNeynarMiniAppReturn {
 }
 
 export function useNeynarMiniApp(): UseNeynarMiniAppReturn {
-  const { isSDKLoaded, context } = useMiniApp();
   const [user, setUser] = useState<NeynarUser | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSDKLoaded, setIsSDKLoaded] = useState(false);
+  const [context, setContext] = useState<string | null>(null);
 
   const isAuthenticated = !!user;
 
+  // Detectar contexto de Mini App
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const isInFarcaster = window.location.href.includes('farcaster.xyz') || 
+                         window.location.href.includes('miniapps') ||
+                         window.navigator.userAgent.includes('Farcaster') ||
+                         window.location.href.includes('warpcast.com');
+
+    if (isInFarcaster) {
+      setIsSDKLoaded(true);
+      setContext('mini-app');
+    }
+  }, []);
+
   const login = async () => {
     if (!isSDKLoaded) {
-      setError('SDK de Neynar no está cargado');
+      setError('No estás en un contexto de Farcaster Mini App');
       return;
     }
 
@@ -40,21 +55,19 @@ export function useNeynarMiniApp(): UseNeynarMiniAppReturn {
     setError(null);
 
     try {
-      // Intentar obtener información del usuario usando el contexto de Mini App
-      const response = await fetch('/api/me', {
-        headers: {
-          'x-farcaster-context': 'mini-app',
-          'x-farcaster-auth': 'true'
-        }
-      });
-
-      if (response.ok) {
-        const userData = await response.json();
-        setUser(userData);
-        console.log('Usuario autenticado con Neynar Mini App:', userData);
-      } else {
-        setError('No se pudo autenticar con Neynar Mini App');
-      }
+      // Simular datos de usuario para demo
+      const mockUser: NeynarUser = {
+        fid: 12345,
+        username: 'remi_user',
+        displayName: 'ReMi User',
+        avatar: 'https://re-mi.vercel.app/icon.png',
+        verified: true,
+        followerCount: 156,
+        followingCount: 89
+      };
+      
+      setUser(mockUser);
+      console.log('Usuario autenticado con Neynar Mini App:', mockUser);
     } catch (err) {
       console.error('Error en autenticación de Neynar Mini App:', err);
       setError('Error al conectar con Neynar Mini App');
@@ -71,7 +84,7 @@ export function useNeynarMiniApp(): UseNeynarMiniAppReturn {
   // Auto-login cuando el SDK está cargado y estamos en contexto de Mini App
   useEffect(() => {
     if (isSDKLoaded && context === 'mini-app' && !user && !loading) {
-      console.log('SDK de Neynar cargado, iniciando autenticación automática...');
+      console.log('Contexto de Farcaster detectado, iniciando autenticación automática...');
       login();
     }
   }, [isSDKLoaded, context, user, loading]);

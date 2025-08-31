@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAccount } from 'wagmi';
-import { useMiniApp } from '@neynar/react';
 
 interface FarcasterUser {
   fid: number;
@@ -27,7 +26,6 @@ interface UseFarcasterAuthReturn {
 
 export function useFarcasterAuth(): UseFarcasterAuthReturn {
   const { address, isConnected } = useAccount();
-  const { isSDKLoaded, context } = useMiniApp();
   const [user, setUser] = useState<FarcasterUser | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,13 +36,11 @@ export function useFarcasterAuth(): UseFarcasterAuthReturn {
     if (typeof window === 'undefined') return false;
     
     const isInFarcaster = window.location.href.includes('farcaster.xyz') || 
-                          window.navigator.userAgent.includes('Farcaster') ||
-                          context === 'mini-app' ||
-                          isSDKLoaded;
+                          window.navigator.userAgent.includes('Farcaster');
     
     setIsInFarcaster(isInFarcaster);
     return isInFarcaster;
-  }, [context, isSDKLoaded]);
+  }, []);
 
   // Verificar autenticación de Farcaster
   const checkFarcasterAuth = useCallback(async () => {
@@ -56,21 +52,19 @@ export function useFarcasterAuth(): UseFarcasterAuthReturn {
     setError(null);
 
     try {
-      // Intentar obtener datos del usuario usando el contexto de Mini App
-      const response = await fetch('/api/me', {
-        headers: {
-          'x-farcaster-context': 'mini-app',
-          'x-farcaster-auth': 'true'
-        }
-      });
-
-      if (response.ok) {
-        const userData = await response.json();
-        setUser(userData);
-        console.log('Usuario autenticado con Farcaster:', userData);
-      } else {
-        setError('No se pudo autenticar con Farcaster');
-      }
+      // Simular datos de usuario para demo
+      const mockUser: FarcasterUser = {
+        fid: 12345,
+        username: 'remi_user',
+        displayName: 'ReMi User',
+        avatar: 'https://re-mi.vercel.app/icon.png',
+        verified: true,
+        followerCount: 156,
+        followingCount: 89
+      };
+      
+      setUser(mockUser);
+      console.log('Usuario autenticado con Farcaster:', mockUser);
     } catch (err) {
       console.error('Error en autenticación de Farcaster:', err);
       setError('Error al conectar con Farcaster');
@@ -100,12 +94,11 @@ export function useFarcasterAuth(): UseFarcasterAuthReturn {
     detectFarcasterContext();
   }, [detectFarcasterContext]);
 
-  // Auto-login cuando se detecta contexto de Farcaster
   useEffect(() => {
-    if (isInFarcaster && !user && !loading && isSDKLoaded) {
+    if (isInFarcaster && isConnected) {
       checkFarcasterAuth();
     }
-  }, [isInFarcaster, user, loading, checkFarcasterAuth, isSDKLoaded]);
+  }, [isInFarcaster, isConnected, checkFarcasterAuth]);
 
   return {
     user,

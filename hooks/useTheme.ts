@@ -4,10 +4,18 @@ import { useEffect, useState } from 'react';
 
 export type Theme = 'light' | 'dark';
 
-export function useTheme(): [Theme, (theme: Theme) => void] {
+interface UseThemeReturn {
+  theme: Theme;
+  toggleTheme: () => void;
+  mounted: boolean;
+}
+
+export function useTheme(): UseThemeReturn {
   const [theme, setTheme] = useState<Theme>('light');
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
       // Get theme from localStorage or default to light
       const savedTheme = localStorage.getItem('theme') as Theme;
@@ -24,8 +32,18 @@ export function useTheme(): [Theme, (theme: Theme) => void] {
     if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
       // Update localStorage
       localStorage.setItem('theme', theme);
+      // Update document class
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
     }
   }, [theme]);
 
-  return [theme, setTheme];
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  };
+
+  return { theme, toggleTheme, mounted };
 } 

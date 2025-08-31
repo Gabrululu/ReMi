@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { CheckCircle, AlertCircle, Info } from 'lucide-react';
-import { useMiniApp } from '@neynar/react';
 
 interface MiniAppContext {
   isMiniApp: boolean;
@@ -13,7 +12,6 @@ interface MiniAppContext {
 }
 
 export function MiniAppDetector() {
-  const { isSDKLoaded, context: neynarContext } = useMiniApp();
   const [context, setContext] = useState<MiniAppContext>({
     isMiniApp: false
   });
@@ -34,54 +32,29 @@ export function MiniAppDetector() {
         isMiniApp: false
       };
 
-      // Detectar si estamos en un contexto de Mini App usando Neynar
+      // Detectar si estamos en un contexto de Mini App
       const isInFarcaster = window.location.href.includes('farcaster.xyz') || 
                            window.location.href.includes('miniapps') ||
                            window.navigator.userAgent.includes('Farcaster') ||
-                           neynarContext === 'mini-app';
+                           window.location.href.includes('warpcast.com');
 
-      if (isInFarcaster && ((window as any).farcasterSDK || isSDKLoaded)) {
+      if (isInFarcaster) {
         miniAppContext.isMiniApp = true;
-        miniAppContext.context = neynarContext || (window as any).farcasterSDK?.context || 'mini-app';
+        miniAppContext.context = 'mini-app';
 
-        // Intentar obtener información del usuario
-        try {
-          const response = await (window as any).farcasterSDK.actions.fetch('/api/me');
-          if (response.ok) {
-            const userData = await response.json();
-            miniAppContext.fid = userData.fid?.toString();
-            miniAppContext.username = userData.username;
-          }
-        } catch (error) {
-          console.log('No se pudo obtener información del usuario:', error);
-        }
-
-        // Intentar obtener la dirección de la wallet
-        if ((window as any).farcasterSDK.wallet?.getAddress) {
-          try {
-            const walletAddress = await (window as any).farcasterSDK.wallet.getAddress();
-            miniAppContext.walletAddress = walletAddress;
-          } catch (error) {
-            console.log('No se pudo obtener la dirección de la wallet:', error);
-          }
-        }
+        // Simular información del usuario para demo
+        miniAppContext.fid = '12345';
+        miniAppContext.username = 'remi_user';
+        miniAppContext.walletAddress = '0x1234567890abcdef1234567890abcdef12345678';
       }
 
       setContext(miniAppContext);
       setLoading(false);
     };
 
-    // Esperar a que el SDK se cargue
-    const checkSDK = () => {
-      if ((window as any).farcasterSDK) {
-        detectMiniAppContext();
-      } else {
-        setTimeout(checkSDK, 100);
-      }
-    };
-
-    checkSDK();
-  }, [isClient, isSDKLoaded, neynarContext]);
+    // Ejecutar detección inmediatamente
+    detectMiniAppContext();
+  }, [isClient]);
 
   // No renderizar hasta que estemos en el cliente
   if (!isClient) {

@@ -11,13 +11,13 @@
   "lang": "es",
   "icons": [
     {
-      "src": "/icon-192.png",
+      "src": "/icon.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icon-512.png", 
+      "src": "/icon.png", 
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -46,7 +46,7 @@
       "url": "/?action=new-task",
       "icons": [
         {
-          "src": "/icon-task.png",
+          "src": "/icon.png",
           "sizes": "96x96"
         }
       ]
@@ -58,7 +58,7 @@
       "url": "/?action=new-goal",
       "icons": [
         {
-          "src": "/icon-goal.png",
+          "src": "/icon.png",
           "sizes": "96x96"
         }
       ]

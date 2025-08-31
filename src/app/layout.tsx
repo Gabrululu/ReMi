@@ -2,11 +2,31 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import dynamic from 'next/dynamic'
+import Script from 'next/script'
 
-// ⛳️ Cargar Providers SOLO en cliente (evita SSR de SDKs que tocan window/indexedDB)
+// ⛳️ Cargar Providers SOLO en cliente
 const ProvidersNoSSR = dynamic(
   () => import('./providers').then(m => m.Providers),
-  { ssr: false }
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-300">Cargando ReMi...</p>
+        </div>
+      </div>
+    )
+  }
+)
+
+// Cargar NeynarProvider de manera opcional
+const NeynarProvider = dynamic(
+  () => import('../../components/NeynarProvider').then(m => ({ default: m.NeynarProvider })),
+  { 
+    ssr: false,
+    loading: () => null
+  }
 )
 
 const inter = Inter({ subsets: ['latin'] })
@@ -72,26 +92,6 @@ export default function RootLayout({
           })}
         />
 
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function () {
-                if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
-                  try {
-                    var theme = localStorage.getItem('theme');
-                    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                    if (theme === 'dark' || (!theme && prefersDark)) {
-                      document.documentElement.classList.add('dark');
-                    } else {
-                      document.documentElement.classList.remove('dark');
-                    }
-                  } catch (e) {}
-                }
-              })();
-            `,
-          }}
-        />
-
         {/* OG / Twitter */}
         <meta property="og:type" content="website" />
         <meta property="og:title" content="ReMi - Social Agenda Web3" />
@@ -124,9 +124,34 @@ export default function RootLayout({
         <meta property="fc:frame:state" content="initial" />
       </head>
 
-      <body className={inter.className}>
+      <body className={inter.className} suppressHydrationWarning>
+        {/* Script para el tema oscuro - se ejecuta solo en el cliente */}
+        <Script
+          id="theme-switcher"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function () {
+                if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+                  try {
+                    var theme = localStorage.getItem('theme');
+                    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    if (theme === 'dark' || (!theme && prefersDark)) {
+                      document.documentElement.classList.add('dark');
+                    } else {
+                      document.documentElement.classList.remove('dark');
+                    }
+                  } catch (e) {}
+                }
+              })();
+            `,
+          }}
+        />
+        
         {/* ✅ Providers solo en cliente */}
-        <ProvidersNoSSR>{children}</ProvidersNoSSR>
+        <ProvidersNoSSR>
+          {children}
+        </ProvidersNoSSR>
       </body>
     </html>
   )

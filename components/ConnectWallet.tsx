@@ -5,8 +5,10 @@ import { useAccount, useBalance, useDisconnect, useConnect, useSwitchChain } fro
 import { createRemiContract, getNetworkInfo } from '../lib/contracts';
 import { UserStats } from './UserStats';
 import { useWalletDetection } from '../hooks/useWalletDetection';
+import { useFarcasterAuth } from '../hooks/useFarcasterAuth';
 import { baseSepolia } from 'wagmi/chains';
 import { defineChain } from 'viem';
+import { User, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 
 // Define Celo Alfajores chain
 const celoAlfajores = defineChain({
@@ -47,6 +49,17 @@ export function ConnectWallet() {
   // Use smart wallet detection
   const { getConnectionOptions, isMobile } = useWalletDetection();
   const { recommended, otherOptions, hasExtensions } = getConnectionOptions();
+
+  // Use Farcaster authentication
+  const { 
+    user: farcasterUser, 
+    loading: farcasterLoading, 
+    error: farcasterError, 
+    isAuthenticated: isFarcasterAuthenticated,
+    isInFarcaster,
+    login: farcasterLogin,
+    logout: farcasterLogout
+  } = useFarcasterAuth();
 
   // Get balance using wagmi
   const { data: balance } = useBalance({
@@ -89,6 +102,7 @@ export function ConnectWallet() {
 
   const handleDisconnect = () => {
     disconnect();
+    farcasterLogout();
     setUserStats(null);
   };
 
@@ -106,20 +120,72 @@ export function ConnectWallet() {
     }
   };
 
-  if (!isConnected) {
+  const handleFarcasterLogin = async () => {
+    await farcasterLogin();
+  };
+
+  if (!isConnected && !isFarcasterAuthenticated) {
     return (
       <div className="space-y-4">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">
-            Conecta tu Wallet
+            Conecta tu Wallet y Farcaster
           </h2>
           <p className="text-gray-600 dark:text-gray-300 mb-6">
             {isMobile 
               ? 'Escanea el código QR con tu wallet móvil'
-              : 'Selecciona tu wallet preferida'
+              : 'Selecciona tu wallet preferida y conecta Farcaster'
             }
           </p>
         </div>
+
+        {/* Farcaster Connection Status */}
+        {isInFarcaster && (
+          <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <User className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                <div>
+                  <p className="font-medium text-purple-800 dark:text-purple-200">
+                    Farcaster Detectado
+                  </p>
+                  <p className="text-sm text-purple-600 dark:text-purple-300">
+                    {isFarcasterAuthenticated ? 'Autenticado' : 'No autenticado'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                {farcasterLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin text-purple-500" />
+                ) : isFarcasterAuthenticated ? (
+                  <CheckCircle className="w-5 h-5 text-green-500" />
+                ) : (
+                  <AlertCircle className="w-5 h-5 text-yellow-500" />
+                )}
+              </div>
+            </div>
+            
+            {!isFarcasterAuthenticated && (
+              <button
+                onClick={handleFarcasterLogin}
+                disabled={farcasterLoading}
+                className="w-full mt-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold py-2 px-4 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {farcasterLoading ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Conectando Farcaster...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center space-x-2">
+                    <User className="w-4 h-4" />
+                    <span>Conectar Farcaster</span>
+                  </div>
+                )}
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Recommended Wallet Button */}
         {recommended && (
@@ -221,6 +287,18 @@ export function ConnectWallet() {
             </div>
           </div>
         )}
+
+        {/* Farcaster Error */}
+        {farcasterError && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg p-4">
+            <div className="flex items-center space-x-2">
+              <AlertCircle className="w-5 h-5 text-red-500" />
+              <p className="text-red-800 dark:text-red-200 text-sm">
+                {farcasterError}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -261,13 +339,35 @@ export function ConnectWallet() {
         loading={loading}
       />
 
+      {/* Farcaster User Info */}
+      {isFarcasterAuthenticated && farcasterUser && (
+        <div className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl p-4">
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3">
+            Usuario de Farcaster
+          </h3>
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
+              <User className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+            </div>
+            <div>
+              <p className="font-medium text-gray-800 dark:text-gray-200">
+                @{farcasterUser.username}
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                FID: {farcasterUser.fid}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Quick Actions */}
       <div className="space-y-3">
         <button
           onClick={handleDisconnect}
           className="w-full bg-gradient-to-r from-gray-600 to-gray-700 dark:from-gray-500 dark:to-gray-600 text-white font-semibold py-3 px-6 rounded-xl hover:from-gray-700 hover:to-gray-800 dark:hover:from-gray-600 dark:hover:to-gray-700 transition-all duration-200 transform hover:scale-105 shadow-lg"
         >
-          🔙 Desconectar
+          🔙 Desconectar Todo
         </button>
       </div>
     </div>

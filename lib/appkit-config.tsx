@@ -1,3 +1,4 @@
+import React from 'react';
 import { WagmiProvider, createConfig, http } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { baseSepolia } from 'wagmi/chains';
@@ -33,7 +34,7 @@ const celoAlfajores = defineChain({
   testnet: true,
 });
 
-// 2. Create wagmi config with smart detection
+// 2. Create wagmi config with smart detection and Farcaster support
 const config = createConfig({
   chains: [baseSepolia, celoAlfajores],
   transports: {
@@ -56,15 +57,17 @@ const config = createConfig({
     }),
     // Generic injected for other wallets
     injected(),
-    // WalletConnect for mobile wallets
+    // WalletConnect for mobile wallets (including Farcaster)
     walletConnect({
       projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'your-project-id',
       metadata: {
         name: 'ReMi - Social Agenda Web3',
-        description: 'Tu agenda social con recompensas Web3',
+        description: 'Tu agenda social con recompensas Web3 y integración Farcaster',
         url: 'https://remi-app.vercel.app',
         icons: ['https://remi-app.vercel.app/icon.png'],
       },
+      // Evita mostrar QR modal dentro de Farcaster
+      showQrModal: false,
     }),
     // Coinbase Wallet
     coinbaseWallet({
@@ -74,10 +77,13 @@ const config = createConfig({
   ],
 });
 
+// 3. Simplified AppKit Provider - Farcaster SDK is handled by @neynar/react
 export function AppKitProvider({ children }: { children: React.ReactNode }) {
   return (
-    <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <WagmiProvider config={config} reconnectOnMount>
+      <QueryClientProvider client={queryClient}>
+        {children}
+      </QueryClientProvider>
     </WagmiProvider>
   );
 }

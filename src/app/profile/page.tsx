@@ -1,36 +1,51 @@
-'use client';
+'use client'
+export const dynamic = 'force-dynamic'
 
-import { useAccount } from 'wagmi';
-import Navbar from '@/components/NavbarNew';
-import { UserProfile } from '@/components/UserProfile';
+import React from 'react'
+import NextDynamic from 'next/dynamic'
+import { useAccount } from 'wagmi'
+
+const FarcasterWrapperNoSSR = NextDynamic<{ children: React.ReactNode }>(
+  () =>
+    import('@/components/FarcasterWrapper').then((m: any) =>
+      (m.FarcasterWrapper ?? m.default) as React.ComponentType<{ children: React.ReactNode }>
+    ),
+  { ssr: false }
+)
+
+const Navbar = NextDynamic(() => import('@/components/NavbarNew'), {
+  ssr: false,
+  loading: () => <div className="h-16" />
+})
+
+const UserProfile = NextDynamic(
+  () => import('@/components/UserProfile').then((m: any) => m.UserProfile ?? m.default),
+  { ssr: false, loading: () => <div className="p-6">Cargando perfil…</div> }
+)
 
 export default function ProfilePage() {
-  const { address } = useAccount();
+  const { address } = useAccount()
 
-  if (!address) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="max-w-4xl mx-auto p-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">👤 Perfil Web3</h1>
-          <p className="text-gray-600">Conecta tu wallet para ver tu perfil</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
+  const content = !address ? (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      
+      <div className="max-w-4xl mx-auto p-6">
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">👤 Perfil Web3</h1>
+        <p className="text-gray-600">Conecta tu wallet para ver tu perfil</p>
+      </div>
+    </div>
+  ) : (
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+
       <main className="max-w-4xl mx-auto p-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">👤 Perfil Web3</h1>
-        
+
         {/* Perfil de Usuario de Farcaster */}
         <div className="mb-8">
           <UserProfile />
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Wallet Info */}
           <div className="bg-white rounded-xl p-6 shadow-sm">
@@ -38,7 +53,9 @@ export default function ProfilePage() {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-gray-600">Dirección:</span>
-                <span className="font-mono text-sm">{address.slice(0, 6)}...{address.slice(-4)}</span>
+                <span className="font-mono text-sm">
+                  {address?.slice(0, 6)}...{address?.slice(-4)}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Red:</span>
@@ -47,7 +64,7 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Reputation */}
+          {/* Reputación */}
           <div className="bg-white rounded-xl p-6 shadow-sm">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">🌟 Reputación</h2>
             <div className="space-y-2">
@@ -62,7 +79,7 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Stats */}
+          {/* Estadísticas */}
           <div className="bg-white rounded-xl p-6 shadow-sm">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">📊 Estadísticas</h2>
             <div className="space-y-2">
@@ -81,7 +98,7 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Integrations */}
+          {/* Integraciones */}
           <div className="bg-white rounded-xl p-6 shadow-sm">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">🔗 Integraciones</h2>
             <div className="space-y-3">
@@ -102,5 +119,7 @@ export default function ProfilePage() {
         </div>
       </main>
     </div>
-  );
+  )
+  
+  return <FarcasterWrapperNoSSR>{content}</FarcasterWrapperNoSSR>
 }

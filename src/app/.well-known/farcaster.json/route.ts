@@ -28,7 +28,7 @@ export async function GET() {
       iconUrl: "https://re-mi.vercel.app/icon.png",
       homeUrl: "https://re-mi.vercel.app",
       imageUrl: "https://re-mi.vercel.app/image.png",
-      buttonTitle: "Check this out",
+      buttonTitle: "Schedule it",
       splashImageUrl: "https://re-mi.vercel.app/splash.png",
       splashBackgroundColor: "#eeccff",
       webhookUrl: "https://re-mi.vercel.app/api/webhook"

@@ -1,4 +1,5 @@
-'use client';
+'use client'
+export const dynamic = 'force-dynamic'
 
 import Navbar from '@/components/NavbarNew';
 import TaskForm from '@/components/TaskForm';

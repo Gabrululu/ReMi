@@ -16,14 +16,17 @@ export interface NotificationAction {
 }
 
 export class NotificationService {
-  private static instance: NotificationService;
+  private static instance: NotificationService | null = null;
   private permission: NotificationPermission = 'default';
 
   private constructor() {
-    this.checkPermission();
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      this.checkPermission();
+    }
   }
 
-  static getInstance(): NotificationService {
+  static getInstance(): NotificationService | null {
+    if (typeof window === 'undefined' || !('Notification' in window)) return null;
     if (!NotificationService.instance) {
       NotificationService.instance = new NotificationService();
     }
@@ -31,17 +34,16 @@ export class NotificationService {
   }
 
   private async checkPermission() {
-    if ('Notification' in window) {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
       this.permission = Notification.permission;
     }
   }
 
   async requestPermission(): Promise<boolean> {
-    if (!('Notification' in window)) {
-      console.warn('Notifications not supported in this browser');
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      console.warn('Notifications not supported in this environment');
       return false;
     }
-
     try {
       const permission = await Notification.requestPermission();
       this.permission = permission;
@@ -53,11 +55,10 @@ export class NotificationService {
   }
 
   async showNotification(options: NotificationOptions): Promise<Notification | null> {
-    if (!('Notification' in window)) {
-      console.warn('Notifications not supported in this browser');
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      console.warn('Notifications not supported in this environment');
       return null;
     }
-
     if (this.permission !== 'granted') {
       const granted = await this.requestPermission();
       if (!granted) {
@@ -65,7 +66,6 @@ export class NotificationService {
         return null;
       }
     }
-
     try {
       const notification = new Notification(options.title, {
         body: options.body,
@@ -75,14 +75,9 @@ export class NotificationService {
         requireInteraction: options.requireInteraction || false,
         data: options.data
       });
-
-      // Auto close after 5 seconds unless requireInteraction is true
       if (!options.requireInteraction) {
-        setTimeout(() => {
-          notification.close();
-        }, 5000);
+        setTimeout(() => notification.close(), 5000);
       }
-
       return notification;
     } catch (error) {
       console.error('Error showing notification:', error);
@@ -90,11 +85,10 @@ export class NotificationService {
     }
   }
 
-  async showTaskReminder(taskTitle: string, dueDate?: string): Promise<Notification | null> {
-    const body = dueDate 
+  async showTaskReminder(taskTitle: string, dueDate?: string) {
+    const body = dueDate
       ? `Tu tarea "${taskTitle}" vence el ${new Date(dueDate).toLocaleDateString()}`
       : `Recordatorio: "${taskTitle}"`;
-
     return this.showNotification({
       title: 'ReMi - Recordatorio de Tarea',
       body,
@@ -104,7 +98,7 @@ export class NotificationService {
     });
   }
 
-  async showGoalReminder(goalTitle: string): Promise<Notification | null> {
+  async showGoalReminder(goalTitle: string) {
     return this.showNotification({
       title: 'ReMi - Meta Semanal',
       body: `¡No olvides tu meta: "${goalTitle}"!`,
@@ -114,23 +108,18 @@ export class NotificationService {
     });
   }
 
-  async showAchievementUnlocked(achievementTitle: string, reward: number): Promise<Notification | null> {
+  async showAchievementUnlocked(achievementTitle: string, reward: number) {
     return this.showNotification({
       title: 'ReMi - ¡Logro Desbloqueado!',
       body: `¡Felicidades! Desbloqueaste "${achievementTitle}" y ganaste ${reward} tokens REMI`,
       icon: '/icon.png',
       tag: 'achievement',
       requireInteraction: true,
-      actions: [
-        {
-          action: 'view',
-          title: 'Ver Logros'
-        }
-      ]
+      actions: [{ action: 'view', title: 'Ver Logros' }]
     });
   }
 
-  async showTaskCompleted(taskTitle: string, reward: number): Promise<Notification | null> {
+  async showTaskCompleted(taskTitle: string, reward: number) {
     return this.showNotification({
       title: 'ReMi - ¡Tarea Completada!',
       body: `¡Excelente! Completaste "${taskTitle}" y ganaste ${reward} tokens REMI`,
@@ -140,23 +129,18 @@ export class NotificationService {
     });
   }
 
-  async showGoalCompleted(goalTitle: string, reward: number): Promise<Notification | null> {
+  async showGoalCompleted(goalTitle: string, reward: number) {
     return this.showNotification({
       title: 'ReMi - ¡Meta Alcanzada!',
       body: `¡Increíble! Alcanzaste tu meta "${goalTitle}" y ganaste ${reward} tokens REMI`,
       icon: '/icon.png',
       tag: 'goal-completed',
       requireInteraction: true,
-      actions: [
-        {
-          action: 'view',
-          title: 'Ver Metas'
-        }
-      ]
+      actions: [{ action: 'view', title: 'Ver Metas' }]
     });
   }
 
-  async showStreakBonus(streakDays: number, bonus: number): Promise<Notification | null> {
+  async showStreakBonus(streakDays: number, bonus: number) {
     return this.showNotification({
       title: 'ReMi - ¡Bonus de Racha!',
       body: `¡${streakDays} días consecutivos! Ganaste ${bonus} tokens extra por tu consistencia`,
@@ -166,7 +150,7 @@ export class NotificationService {
     });
   }
 
-  async showFarcasterShareReward(reward: number): Promise<Notification | null> {
+  async showFarcasterShareReward(reward: number) {
     return this.showNotification({
       title: 'ReMi - ¡Compartiste en Farcaster!',
       body: `Gracias por compartir. Ganaste ${reward} tokens REMI por tu contribución social`,
@@ -176,61 +160,48 @@ export class NotificationService {
     });
   }
 
-  // Schedule a notification for a specific time
   scheduleNotification(options: NotificationOptions, scheduledTime: Date): number {
-    const now = new Date();
-    const delay = scheduledTime.getTime() - now.getTime();
-
+    const delay = scheduledTime.getTime() - Date.now();
     if (delay <= 0) {
       console.warn('Scheduled time is in the past');
       return -1;
     }
-
-    return setTimeout(() => {
-      this.showNotification(options);
-    }, delay);
+    return setTimeout(() => { this.showNotification(options); }, delay) as unknown as number;
   }
 
-  // Cancel a scheduled notification
   cancelScheduledNotification(timeoutId: number): void {
     clearTimeout(timeoutId);
   }
 
-  // Check if notifications are supported and enabled
-  isSupported(): boolean {
-    return 'Notification' in window;
-  }
-
-  isEnabled(): boolean {
-    return this.permission === 'granted';
-  }
-
-  getPermissionStatus(): NotificationPermission {
-    return this.permission;
-  }
+  isSupported(): boolean { return typeof window !== 'undefined' && 'Notification' in window; }
+  isEnabled(): boolean { return this.permission === 'granted'; }
+  getPermissionStatus(): NotificationPermission { return this.permission; }
 }
 
-// Export a singleton instance
-export const notificationService = NotificationService.getInstance();
+// ⚠️ Named export que tus componentes están esperando
+export const notificationService = {
+  requestPermission: () => NotificationService.getInstance()?.requestPermission() ?? Promise.resolve(false),
+  showTaskReminder: (title: string, due?: string) => NotificationService.getInstance()?.showTaskReminder(title, due) ?? null,
+  showGoalReminder: (title: string) => NotificationService.getInstance()?.showGoalReminder(title) ?? null,
+  showAchievementUnlocked: (t: string, r: number) => NotificationService.getInstance()?.showAchievementUnlocked(t, r) ?? null,
+  showTaskCompleted: (t: string, r: number) => NotificationService.getInstance()?.showTaskCompleted(t, r) ?? null,
+  showGoalCompleted: (t: string, r: number) => NotificationService.getInstance()?.showGoalCompleted(t, r) ?? null,
+  showStreakBonus: (d: number, b: number) => NotificationService.getInstance()?.showStreakBonus(d, b) ?? null,
+  showFarcasterShareReward: (r: number) => NotificationService.getInstance()?.showFarcasterShareReward(r) ?? null,
+};
 
-// Utility functions for common notifications
-export const showTaskReminder = (taskTitle: string, dueDate?: string) => 
-  notificationService.showTaskReminder(taskTitle, dueDate);
-
-export const showGoalReminder = (goalTitle: string) => 
-  notificationService.showGoalReminder(goalTitle);
-
-export const showAchievementUnlocked = (achievementTitle: string, reward: number) => 
-  notificationService.showAchievementUnlocked(achievementTitle, reward);
-
-export const showTaskCompleted = (taskTitle: string, reward: number) => 
-  notificationService.showTaskCompleted(taskTitle, reward);
-
-export const showGoalCompleted = (goalTitle: string, reward: number) => 
-  notificationService.showGoalCompleted(goalTitle, reward);
-
-export const showStreakBonus = (streakDays: number, bonus: number) => 
-  notificationService.showStreakBonus(streakDays, bonus);
-
-export const showFarcasterShareReward = (reward: number) => 
-  notificationService.showFarcasterShareReward(reward); 
+// (Opcionales) helpers directos si quieres usarlos en otros lados
+export const showTaskReminder = (title: string, due?: string) =>
+  NotificationService.getInstance()?.showTaskReminder(title, due) ?? null;
+export const showGoalReminder = (title: string) =>
+  NotificationService.getInstance()?.showGoalReminder(title) ?? null;
+export const showAchievementUnlocked = (t: string, r: number) =>
+  NotificationService.getInstance()?.showAchievementUnlocked(t, r) ?? null;
+export const showTaskCompleted = (t: string, r: number) =>
+  NotificationService.getInstance()?.showTaskCompleted(t, r) ?? null;
+export const showGoalCompleted = (t: string, r: number) =>
+  NotificationService.getInstance()?.showGoalCompleted(t, r) ?? null;
+export const showStreakBonus = (d: number, b: number) =>
+  NotificationService.getInstance()?.showStreakBonus(d, b) ?? null;
+export const showFarcasterShareReward = (r: number) =>
+  NotificationService.getInstance()?.showFarcasterShareReward(r) ?? null;

@@ -132,7 +132,7 @@ export function WeeklyGoals({ network }: WeeklyGoalsProps) {
       
       if (result.success) {
         // Show notification
-        await notificationService.showGoalCompleted(goal.title, result.reward);
+        await notificationService.showGoalCompleted?.(goal.title, result.reward);
         
         // Trigger confetti
         setShowConfetti(true);

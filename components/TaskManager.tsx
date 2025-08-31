@@ -126,7 +126,7 @@ export function TaskManager({ network }: TaskManagerProps) {
         saveTasks(updatedTasks);
 
         // Show notification
-        await notificationService.showTaskCompleted(task.title, result.reward);
+        await notificationService.showTaskCompleted?.(task.title, result.reward);
         
         // Trigger confetti for completion
         if (!task.completed) {
@@ -152,7 +152,7 @@ export function TaskManager({ network }: TaskManagerProps) {
 
     if (delay > 0) {
       setTimeout(() => {
-        notificationService.showTaskReminder(task.title, task.dueDate);
+        notificationService.showTaskReminder?.(task.title, task.dueDate);
       }, delay);
     }
   };

@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import dynamic from 'next/dynamic'
 import Script from 'next/script'
+import { getFarcasterEmbedJSON } from '../../lib/farcaster-embed'
 
 // Cargar el componente simple de ready
 const FarcasterReady = dynamic(
@@ -99,27 +100,15 @@ export default function RootLayout({
         <meta name="farcaster:mini-app:author-url" content="https://re-mi.vercel.app" />
 
         {/* Farcaster Mini App Embed - REQUERIDO según la especificación */}
-        <meta name="fc:miniapp" content='{"version":"1","imageUrl":"https://re-mi.vercel.app/hero.png","button":{"title":"🚀 Abrir ReMi","action":{"type":"launch_miniapp","url":"https://re-mi.vercel.app"}}}' />
+        <meta
+          name="fc:miniapp"
+          content={getFarcasterEmbedJSON()}
+        />
 
-        {/* Farcaster Frame - Para compatibilidad hacia atrás */}
-        <meta name="fc:frame" content='{"version":"1","imageUrl":"https://re-mi.vercel.app/hero.png","button":{"title":"🚀 Abrir ReMi","action":{"type":"launch_miniapp","url":"https://re-mi.vercel.app"}}}' />
-
+        {/* Opcional: back-compat, MISMO CONTENIDO */}
         <meta
           name="fc:frame"
-          content={JSON.stringify({
-            version: 'next',
-            imageUrl: 'https://re-mi.vercel.app/hero.png',
-            button: {
-              title: '🚀 Abrir ReMi',
-              action: {
-                type: 'launch_frame',
-                name: 'ReMi - Social Agenda Web3',
-                url: 'https://re-mi.vercel.app',
-                splashImageUrl: 'https://re-mi.vercel.app/splash.png',
-                splashBackgroundColor: '#1e293b',
-              },
-            },
-          })}
+          content={getFarcasterEmbedJSON()}
         />
 
         {/* OG / Twitter */}
@@ -145,13 +134,7 @@ export default function RootLayout({
         <meta name="twitter:image" content="https://re-mi.vercel.app/hero.png" />
         <meta name="twitter:creator" content="@remi_app" />
 
-        {/* Farcaster Frame Meta Tags */}
-        <meta property="fc:frame" content="vNext" />
-        <meta property="fc:frame:image" content="https://re-mi.vercel.app/hero.png" />
-        <meta property="fc:frame:button:1" content="Abrir ReMi" />
-        <meta property="fc:frame:post_url" content="https://re-mi.vercel.app/api/frame" />
-        <meta property="fc:frame:input:text" content="false" />
-        <meta property="fc:frame:state" content="initial" />
+        {/* Farcaster Frame Meta Tags - ELIMINADOS para evitar duplicados */}
       </head>
 
       <body className={inter.className} suppressHydrationWarning>

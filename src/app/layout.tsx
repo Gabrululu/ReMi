@@ -67,12 +67,6 @@ export const metadata: Metadata = {
     images: ['https://re-mi.vercel.app/hero.png'],
     creator: '@remi_app',
   },
-  other: {
-    'fc:frame': 'vNext',
-    'fc:frame:image': 'https://re-mi.vercel.app/hero.png',
-    'fc:frame:button:1': 'Abrir ReMi',
-    'fc:frame:post_url': 'https://re-mi.vercel.app/',
-  },
 }
 
 export default function RootLayout({
@@ -86,19 +80,6 @@ export default function RootLayout({
         {/* Preconnect hint para optimizar performance */}
         <link rel="preconnect" href="https://auth.farcaster.xyz" />
         
-        {/* Farcaster Mini App Meta Tags */}
-        <meta name="farcaster:mini-app" content="true" />
-        <meta name="farcaster:mini-app:name" content="ReMi - Social Agenda Web3" />
-        <meta name="farcaster:mini-app:description" content="Tu agenda social con recompensas Web3, recordatorios y gamificación" />
-        <meta name="farcaster:mini-app:icon" content="https://re-mi.vercel.app/icon.png" />
-        <meta name="farcaster:mini-app:splash-image" content="https://re-mi.vercel.app/splash.png" />
-        <meta name="farcaster:mini-app:splash-background-color" content="#1e293b" />
-        <meta name="farcaster:mini-app:primary-color" content="#3b82f6" />
-        <meta name="farcaster:mini-app:secondary-color" content="#8b5cf6" />
-        <meta name="farcaster:mini-app:version" content="0.1.1" />
-        <meta name="farcaster:mini-app:author" content="ReMi Team" />
-        <meta name="farcaster:mini-app:author-url" content="https://re-mi.vercel.app" />
-
         {/* Farcaster Mini App Embed - REQUERIDO según la especificación */}
         <meta
           name="fc:miniapp"
@@ -133,8 +114,6 @@ export default function RootLayout({
         />
         <meta name="twitter:image" content="https://re-mi.vercel.app/hero.png" />
         <meta name="twitter:creator" content="@remi_app" />
-
-        {/* Farcaster Frame Meta Tags - ELIMINADOS para evitar duplicados */}
       </head>
 
       <body className={inter.className} suppressHydrationWarning>

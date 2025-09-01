@@ -1,40 +1,19 @@
 'use client';
 
 import { useEffect } from 'react';
+import { sdk } from '@farcaster/miniapp-sdk';
 
 export function FarcasterReady() {
   useEffect(() => {
-    let mounted = true;
-    
-    async function go() {
+    (async () => {
       try {
-        console.log('🚀 Inicializando Farcaster Mini App...');
-        
-        // Importar el SDK
-        const { sdk } = await import('@farcaster/miniapp-sdk');
-        
-        console.log('✅ SDK cargado correctamente');
-        
-        // Opcional: chequea contexto si tu SDK lo expone
-        // const ctx = await sdk.context.get();
-        // if (!ctx?.isMiniApp) return;
-        
-        console.log('📞 Llamando sdk.actions.ready()...');
-        
-        // Llamar ready() según la documentación
+        // Señal al cliente Farcaster: la UI está lista
         await sdk.actions.ready();
-        
-        console.log('✅ ready() llamado exitosamente');
+        // opcional: console.info('Mini App ready');
       } catch (e) {
-        console.error('❌ ready() failed', e);
+        // opcional: console.error('sdk.actions.ready() failed', e);
       }
-    }
-    
-    if (mounted) go();
-    
-    return () => {
-      mounted = false;
-    };
+    })();
   }, []);
 
   return null;

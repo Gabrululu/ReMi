@@ -4,28 +4,31 @@ import { useEffect } from 'react';
 
 export function FarcasterReady() {
   useEffect(() => {
-    const callReady = async () => {
+    const initializeFarcaster = async () => {
       try {
-        console.log('🚀 Intentando cargar SDK de Farcaster...');
+        console.log('🚀 Inicializando Farcaster Mini App...');
         
         // Importar el SDK
         const { sdk } = await import('@farcaster/miniapp-sdk');
         
-        console.log('✅ SDK cargado, llamando ready()...');
+        console.log('✅ SDK cargado correctamente');
         
-        // Llamar ready() inmediatamente
+        // Esperar a que la app esté completamente cargada
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        console.log('📞 Llamando sdk.actions.ready()...');
+        
+        // Llamar ready() según la documentación
         await sdk.actions.ready();
         
         console.log('✅ ready() llamado exitosamente');
       } catch (error) {
-        console.error('❌ Error al llamar ready():', error);
+        console.error('❌ Error al inicializar Farcaster:', error);
       }
     };
 
-    // Ejecutar después de un breve delay para asegurar que todo esté listo
-    const timer = setTimeout(callReady, 1000);
-    
-    return () => clearTimeout(timer);
+    // Ejecutar la inicialización
+    initializeFarcaster();
   }, []);
 
   return null;

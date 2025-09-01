@@ -4,15 +4,6 @@ import './globals.css'
 import dynamic from 'next/dynamic'
 import Script from 'next/script'
 
-// Cargar el inicializador de Farcaster Mini App de manera dinámica
-const FarcasterMiniAppInitializer = dynamic(
-  () => import('../../components/FarcasterMiniAppInitializer').then(m => ({ default: m.FarcasterMiniAppInitializer })),
-  { 
-    ssr: false,
-    loading: () => null
-  }
-)
-
 // Cargar el componente simple de ready
 const FarcasterReady = dynamic(
   () => import('../../components/FarcasterReady').then(m => ({ default: m.FarcasterReady })),
@@ -164,42 +155,9 @@ export default function RootLayout({
       </head>
 
       <body className={inter.className} suppressHydrationWarning>
-        {/* Inicializador de Farcaster Mini App - se ejecuta inmediatamente */}
-        <FarcasterMiniAppInitializer />
-        
         {/* Componente simple para llamar ready() */}
         <FarcasterReady />
         
-        {/* Script para inicializar Farcaster Mini App inmediatamente */}
-        <Script
-          id="farcaster-miniapp-init"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function () {
-                if (typeof window !== 'undefined') {
-                  console.log('🚀 Inicializando Farcaster Mini App...');
-                  
-                  // Intentar cargar el SDK y llamar ready() cuando esté disponible
-                  const initSDK = async () => {
-                    try {
-                      const { sdk } = await import('@farcaster/miniapp-sdk');
-                      console.log('✅ SDK cargado, llamando ready()...');
-                      await sdk.actions.ready();
-                      console.log('✅ Farcaster Mini App inicializada correctamente');
-                    } catch (error) {
-                      console.error('❌ Error al inicializar SDK:', error);
-                    }
-                  };
-
-                  // Ejecutar inmediatamente
-                  initSDK();
-                }
-              })();
-            `,
-          }}
-        />
-
         {/* Script para el tema oscuro - se ejecuta solo en el cliente */}
         <Script
           id="theme-switcher"

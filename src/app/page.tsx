@@ -15,6 +15,7 @@ import { ClientOnly } from '../../components/ClientOnly'
 import { useFarcasterMiniApp } from '../../hooks/useFarcasterMiniApp'
 import { FarcasterMiniAppStatus } from '../../components/FarcasterMiniAppStatus'
 import { FarcasterMiniAppTester } from '../../components/FarcasterMiniAppTester'
+import { SimpleFarcasterTest } from '../../components/SimpleFarcasterTest'
 
 const WalletRuntime = NextDynamic(() => import('@/components/WalletRuntime'), {
   ssr: false,
@@ -29,36 +30,8 @@ export default function HomePage() {
     const { isConnected } = useAccount()
   const { isReady, isMiniApp, error, ready } = useFarcasterMiniApp()
 
-  // Llamar a ready() cuando la app esté completamente cargada
-  useEffect(() => {
-    const markAsReady = async () => {
-      console.log('Iniciando proceso de ready()...', { isMiniApp, isReady });
-      
-      // Esperar un poco para asegurar que todo esté cargado
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Intentar llamar ready() múltiples veces si es necesario
-      let attempts = 0;
-      const maxAttempts = 5;
-      
-      while (attempts < maxAttempts) {
-        try {
-          console.log(`Intento ${attempts + 1} de llamar ready()...`);
-          await ready();
-          console.log('✅ ready() llamado exitosamente');
-          break;
-        } catch (err) {
-          console.log(`Intento ${attempts + 1} falló:`, err);
-          attempts++;
-          if (attempts < maxAttempts) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-          }
-        }
-      }
-    };
-
-    markAsReady();
-  }, [ready, isMiniApp]);
+  // Eliminar la llamada duplicada a ready() aquí
+  // El componente FarcasterReady se encarga de esto
 
   return (
     <ClientOnly>
@@ -86,6 +59,9 @@ export default function HomePage() {
 
             {/* Farcaster Mini App Tester */}
             <FarcasterMiniAppTester />
+
+            {/* Simple Farcaster Test */}
+            <SimpleFarcasterTest />
 
             {/* Header with Theme Toggle */}
             <div className="text-center mb-8">

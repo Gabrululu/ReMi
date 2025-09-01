@@ -4,7 +4,7 @@ import './globals.css'
 import dynamic from 'next/dynamic'
 import Script from 'next/script'
 
-// ⛳️ Cargar Providers SOLO en cliente
+
 const ProvidersNoSSR = dynamic(
   () => import('./providers').then(m => m.Providers),
   { 
@@ -20,7 +20,6 @@ const ProvidersNoSSR = dynamic(
   }
 )
 
-// Cargar NeynarProvider de manera opcional
 const NeynarProvider = dynamic(
   () => import('../../components/NeynarProvider').then(m => ({ default: m.NeynarProvider })),
   { 
@@ -74,6 +73,19 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
+        {/* Farcaster Mini App Meta Tags */}
+        <meta name="farcaster:mini-app" content="true" />
+        <meta name="farcaster:mini-app:name" content="ReMi - Social Agenda Web3" />
+        <meta name="farcaster:mini-app:description" content="Tu agenda social con recompensas Web3, recordatorios y gamificación" />
+        <meta name="farcaster:mini-app:icon" content="https://re-mi.vercel.app/icon.png" />
+        <meta name="farcaster:mini-app:splash-image" content="https://re-mi.vercel.app/splash.png" />
+        <meta name="farcaster:mini-app:splash-background-color" content="#1e293b" />
+        <meta name="farcaster:mini-app:primary-color" content="#3b82f6" />
+        <meta name="farcaster:mini-app:secondary-color" content="#8b5cf6" />
+        <meta name="farcaster:mini-app:version" content="0.1.1" />
+        <meta name="farcaster:mini-app:author" content="ReMi Team" />
+        <meta name="farcaster:mini-app:author-url" content="https://re-mi.vercel.app" />
+
         <meta
           name="fc:frame"
           content={JSON.stringify({

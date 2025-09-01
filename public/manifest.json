@@ -63,5 +63,34 @@
         }
       ]
     }
-  ]
+  ],
+  "farcaster": {
+    "mini_app": {
+      "name": "ReMi - Social Agenda Web3",
+      "description": "Tu agenda social con recompensas Web3, recordatorios y gamificación",
+      "icon": "/icon.png",
+      "splash_image": "/splash.png",
+      "splash_background_color": "#1e293b",
+      "primary_color": "#3b82f6",
+      "secondary_color": "#8b5cf6",
+      "categories": ["productivity", "social", "utilities"],
+      "tags": ["web3", "productivity", "social", "rewards", "reminders"],
+      "author": {
+        "name": "ReMi Team",
+        "url": "https://re-mi.vercel.app"
+      },
+      "version": "0.1.1",
+      "permissions": [
+        "notifications",
+        "wallet_connect",
+        "farcaster_auth"
+      ],
+      "features": [
+        "task_management",
+        "rewards_system",
+        "social_integration",
+        "web3_wallet"
+      ]
+    }
+  }
 } 

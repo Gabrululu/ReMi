@@ -1,7 +1,7 @@
 'use client'
 export const dynamic = 'force-dynamic'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import NextDynamic from 'next/dynamic'
 import { useAccount } from 'wagmi'
 
@@ -12,7 +12,8 @@ import { Dashboard } from '../../components/Dashboard'
 import { FarcasterDashboard } from '../../components/FarcasterDashboard'
 import { ReownFarcasterDemo } from '../../components/ReownFarcasterDemo'
 import { ClientOnly } from '../../components/ClientOnly'
-
+import { useFarcasterMiniApp } from '../../hooks/useFarcasterMiniApp'
+import { FarcasterMiniAppStatus } from '../../components/FarcasterMiniAppStatus'
 
 const WalletRuntime = NextDynamic(() => import('@/components/WalletRuntime'), {
   ssr: false,
@@ -25,15 +26,41 @@ export default function HomePage() {
   const [network, setNetwork] = useState<'baseSepolia' | 'celoAlfajores'>('baseSepolia')
 
   const { isConnected } = useAccount()
+  const { isReady, isMiniApp, error, ready } = useFarcasterMiniApp()
+  
+  useEffect(() => {
+    const markAsReady = async () => {      
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      await ready();
+    };
+
+    markAsReady();
+  }, [ready]);
 
   return (
     <ClientOnly>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4 transition-all duration-300">
-        {/* Inicialización temprana de wagmi/wallets sin SSR */}
+        {/* Inicialización de wagmi/wallets */}
         <WalletRuntime />
+
+        {/* Indicador de estado de Farcaster Mini App */}
+        {isMiniApp && (
+          <div className="fixed top-4 right-4 z-50">
+            <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+              isReady 
+                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+                : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+            }`}>
+              {isReady ? '✅ Mini App Lista' : '⏳ Cargando...'}
+            </div>
+          </div>
+        )}
 
         <div className={`${isConnected ? 'max-w-6xl' : 'max-w-md'} w-full`}>
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl dark:shadow-gray-900/50 p-8 transition-all duration-300">
+            {/* Farcaster Mini App Status */}
+            <FarcasterMiniAppStatus />
+
             {/* Header with Theme Toggle */}
             <div className="text-center mb-8">
               <div className="flex items-center justify-end mb-4">

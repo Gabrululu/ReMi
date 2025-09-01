@@ -14,6 +14,7 @@ import { ReownFarcasterDemo } from '../../components/ReownFarcasterDemo'
 import { ClientOnly } from '../../components/ClientOnly'
 import { useFarcasterMiniApp } from '../../hooks/useFarcasterMiniApp'
 import { FarcasterMiniAppStatus } from '../../components/FarcasterMiniAppStatus'
+import { FarcasterMiniAppTester } from '../../components/FarcasterMiniAppTester'
 
 const WalletRuntime = NextDynamic(() => import('@/components/WalletRuntime'), {
   ssr: false,
@@ -25,17 +26,39 @@ export default function HomePage() {
   
   const [network, setNetwork] = useState<'baseSepolia' | 'celoAlfajores'>('baseSepolia')
 
-  const { isConnected } = useAccount()
+    const { isConnected } = useAccount()
   const { isReady, isMiniApp, error, ready } = useFarcasterMiniApp()
-  
+
+  // Llamar a ready() cuando la app esté completamente cargada
   useEffect(() => {
-    const markAsReady = async () => {      
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      await ready();
+    const markAsReady = async () => {
+      console.log('Iniciando proceso de ready()...', { isMiniApp, isReady });
+      
+      // Esperar un poco para asegurar que todo esté cargado
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Intentar llamar ready() múltiples veces si es necesario
+      let attempts = 0;
+      const maxAttempts = 5;
+      
+      while (attempts < maxAttempts) {
+        try {
+          console.log(`Intento ${attempts + 1} de llamar ready()...`);
+          await ready();
+          console.log('✅ ready() llamado exitosamente');
+          break;
+        } catch (err) {
+          console.log(`Intento ${attempts + 1} falló:`, err);
+          attempts++;
+          if (attempts < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+        }
+      }
     };
 
     markAsReady();
-  }, [ready]);
+  }, [ready, isMiniApp]);
 
   return (
     <ClientOnly>
@@ -60,6 +83,9 @@ export default function HomePage() {
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl dark:shadow-gray-900/50 p-8 transition-all duration-300">
             {/* Farcaster Mini App Status */}
             <FarcasterMiniAppStatus />
+
+            {/* Farcaster Mini App Tester */}
+            <FarcasterMiniAppTester />
 
             {/* Header with Theme Toggle */}
             <div className="text-center mb-8">

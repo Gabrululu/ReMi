@@ -4,6 +4,15 @@ import './globals.css'
 import dynamic from 'next/dynamic'
 import Script from 'next/script'
 
+// Cargar el inicializador de Farcaster Mini App de manera dinámica
+const FarcasterMiniAppInitializer = dynamic(
+  () => import('../../components/FarcasterMiniAppInitializer').then(m => ({ default: m.FarcasterMiniAppInitializer })),
+  { 
+    ssr: false,
+    loading: () => null
+  }
+)
+
 
 const ProvidersNoSSR = dynamic(
   () => import('./providers').then(m => m.Providers),
@@ -73,6 +82,9 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
+        {/* Preconnect hint para optimizar performance */}
+        <link rel="preconnect" href="https://auth.farcaster.xyz" />
+        
         {/* Farcaster Mini App Meta Tags */}
         <meta name="farcaster:mini-app" content="true" />
         <meta name="farcaster:mini-app:name" content="ReMi - Social Agenda Web3" />
@@ -85,6 +97,19 @@ export default function RootLayout({
         <meta name="farcaster:mini-app:version" content="0.1.1" />
         <meta name="farcaster:mini-app:author" content="ReMi Team" />
         <meta name="farcaster:mini-app:author-url" content="https://re-mi.vercel.app" />
+
+        {/* Farcaster Mini App Embed - REQUERIDO según la especificación */}
+        <meta name="fc:miniapp" content={JSON.stringify({
+          version: "1",
+          imageUrl: "https://re-mi.vercel.app/hero.png",
+          button: {
+            title: "🚀 Abrir ReMi",
+            action: {
+              type: "launch_miniapp",
+              url: "https://re-mi.vercel.app"
+            }
+          }
+        })} />
 
         <meta
           name="fc:frame"
@@ -137,6 +162,70 @@ export default function RootLayout({
       </head>
 
       <body className={inter.className} suppressHydrationWarning>
+        {/* Inicializador de Farcaster Mini App - se ejecuta inmediatamente */}
+        <FarcasterMiniAppInitializer />
+        
+        {/* Script para inicializar Farcaster Mini App inmediatamente */}
+        <Script
+          id="farcaster-miniapp-init"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function () {
+                if (typeof window !== 'undefined') {
+                  console.log('🚀 Inicializando Farcaster Mini App...');
+                  
+                  // Detectar contexto de Farcaster
+                  const isInFarcaster = 
+                    window.location.href.includes('farcaster.xyz') || 
+                    window.location.href.includes('miniapps') ||
+                    window.location.href.includes('warpcast.com') ||
+                    window.navigator.userAgent.includes('Farcaster') ||
+                    window.navigator.userAgent.includes('Warpcast') ||
+                    window !== window.top ||
+                    document.referrer.includes('farcaster.xyz') ||
+                    document.referrer.includes('warpcast.com') ||
+                    // Detectar por URL de desarrollo
+                    window.location.href.includes('localhost') ||
+                    window.location.href.includes('127.0.0.1') ||
+                    // Detectar por parámetros de URL
+                    window.location.search.includes('farcaster') ||
+                    window.location.search.includes('miniapp');
+
+                  console.log('Contexto detectado:', {
+                    url: window.location.href,
+                    userAgent: window.navigator.userAgent,
+                    referrer: document.referrer,
+                    isInIframe: window !== window.top,
+                    isInFarcaster
+                  });
+
+                  if (isInFarcaster) {
+                    console.log('✅ Contexto de Farcaster detectado');
+                    
+                    // Intentar cargar el SDK y llamar ready() cuando esté disponible
+                    const initSDK = async () => {
+                      try {
+                        const { sdk } = await import('@farcaster/miniapp-sdk');
+                        console.log('✅ SDK cargado, llamando ready()...');
+                        await sdk.actions.ready();
+                        console.log('✅ Farcaster Mini App inicializada correctamente');
+                      } catch (error) {
+                        console.error('❌ Error al inicializar SDK:', error);
+                      }
+                    };
+
+                    // Ejecutar después de un breve delay para asegurar que todo esté listo
+                    setTimeout(initSDK, 1000);
+                  } else {
+                    console.log('ℹ️ No se detectó contexto de Farcaster Mini App');
+                  }
+                }
+              })();
+            `,
+          }}
+        />
+
         {/* Script para el tema oscuro - se ejecuta solo en el cliente */}
         <Script
           id="theme-switcher"

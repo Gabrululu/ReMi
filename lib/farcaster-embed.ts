@@ -6,6 +6,7 @@ export const farcasterEmbedConfig = {
     title: "🚀 Abrir ReMi",
     action: {
       type: "launch_miniapp",
+      name: "ReMi",
       url: "https://re-mi.vercel.app",
     },
   },

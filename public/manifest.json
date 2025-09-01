@@ -90,7 +90,18 @@
         "rewards_system",
         "social_integration",
         "web3_wallet"
-      ]
+      ],
+      "embed": {
+        "version": "1",
+        "imageUrl": "https://re-mi.vercel.app/hero.png",
+        "button": {
+          "title": "🚀 Abrir ReMi",
+          "action": {
+            "type": "launch_miniapp",
+            "url": "https://re-mi.vercel.app"
+          }
+        }
+      }
     }
   }
 } 

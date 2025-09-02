@@ -1,12 +1,12 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { AppKitProvider } from '../../lib/appkit-config'
+import { AppKitProviderWrapper } from '../../lib/appkit-config'
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
-    <AppKitProvider>
+    <AppKitProviderWrapper>
       {children}
-    </AppKitProvider>
+    </AppKitProviderWrapper>
   )
 }

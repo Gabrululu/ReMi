@@ -337,30 +337,7 @@ export function Dashboard({ network }: DashboardProps) {
         </div>
       </div>
 
-      {/* Network Info */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
-            <div>
-              <h4 className="font-medium text-gray-900 dark:text-white">
-                {network === 'baseSepolia' ? 'Base Sepolia' : 'Celo Alfajores'}
-              </h4>
-              <p className="text-sm text-gray-600 dark:text-gray-300">
-                Red activa para transacciones
-              </p>
-            </div>
-          </div>
-          <div className="text-right">
-            <div className="text-sm font-medium text-gray-900 dark:text-white">
-              {address?.slice(0, 6)}...{address?.slice(-4)}
-            </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">
-              Wallet conectada
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Network Info - ocultado por solicitud del usuario */}
     </div>
   );
 } 

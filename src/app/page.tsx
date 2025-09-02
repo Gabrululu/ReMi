@@ -6,13 +6,14 @@ import NextDynamic from 'next/dynamic'
 import { useAccount } from 'wagmi'
 
 import { ConnectWallet } from '../../components/ConnectWallet'
-import { WalletInstructions } from '../../components/WalletInstructions'
-import { ThemeToggle } from '../../components/ThemeToggle'
+import { SignInWithFarcasterButton } from '../../components/SignInWithFarcasterButton'
+import { AppHeader } from '../../components/AppHeader'
+import { NetworkSelector } from '../../components/NetworkSelector'
 import { Dashboard } from '../../components/Dashboard'
-import { FarcasterDashboard } from '../../components/FarcasterDashboard'
-import { ReownFarcasterDemo } from '../../components/ReownFarcasterDemo'
 import { ClientOnly } from '../../components/ClientOnly'
-import { useFarcasterMiniApp } from '../../hooks/useFarcasterMiniApp'
+import { useMiniAppEnv } from '../../hooks/useMiniAppEnv'
+
+// Componentes de debug (solo en desarrollo)
 import { FarcasterMiniAppStatus } from '../../components/FarcasterMiniAppStatus'
 import { FarcasterMiniAppTester } from '../../components/FarcasterMiniAppTester'
 import { SimpleFarcasterTest } from '../../components/SimpleFarcasterTest'
@@ -22,216 +23,233 @@ const WalletRuntime = NextDynamic(() => import('@/components/WalletRuntime'), {
 })
 
 export default function HomePage() {
-  const [showInstructions, setShowInstructions] = useState(false)
-  const [showReownDemo, setShowReownDemo] = useState(false)
-  
   const [network, setNetwork] = useState<'baseSepolia' | 'celoAlfajores'>('baseSepolia')
+  const [farcasterProfile, setFarcasterProfile] = useState<any>(null)
+  const [showWalletConnect, setShowWalletConnect] = useState(false)
+  
+  const { isConnected } = useAccount()
+  const { isMiniApp, context } = useMiniAppEnv()
+  
+  // Flag de debug
+  const isDebug = process.env.NEXT_PUBLIC_FC_DEBUG === '1'
 
-    const { isConnected } = useAccount()
-  const { isReady, isMiniApp, error, ready } = useFarcasterMiniApp()
+  // Cerrar modal cuando se conecte exitosamente
+  useEffect(() => {
+    if (isConnected && showWalletConnect) {
+      setShowWalletConnect(false)
+    }
+  }, [isConnected, showWalletConnect])
 
-  // Eliminar la llamada duplicada a ready() aquí
-  // El componente FarcasterReady se encarga de esto
+  // Función para desconectar
+  const handleDisconnect = () => {
+    setFarcasterProfile(null)
+    // Aquí puedes agregar lógica adicional de desconexión
+  }
 
   return (
     <ClientOnly>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4 transition-all duration-300">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-all duration-300">
         {/* Inicialización de wagmi/wallets */}
         <WalletRuntime />
 
-        {/* Indicador de estado de Farcaster Mini App */}
-        {isMiniApp && (
-          <div className="fixed top-4 right-4 z-50">
-            <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-              isReady 
-                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
-                : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-            }`}>
-              {isReady ? '✅ Mini App Lista' : '⏳ Cargando...'}
+        {/* Loading state */}
+        {isMiniApp === null && (
+          <div className="flex items-center justify-center min-h-screen">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600 dark:text-gray-300">Cargando ReMi...</p>
             </div>
           </div>
         )}
 
-        <div className={`${isConnected ? 'max-w-6xl' : 'max-w-md'} w-full`}>
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl dark:shadow-gray-900/50 p-8 transition-all duration-300">
-            {/* Farcaster Mini App Status */}
-            <FarcasterMiniAppStatus />
-
-            {/* Farcaster Mini App Tester */}
-            <FarcasterMiniAppTester />
-
-            {/* Simple Farcaster Test */}
-            <SimpleFarcasterTest />
-
-            {/* Header with Theme Toggle */}
-            <div className="text-center mb-8">
-              <div className="flex items-center justify-end mb-4">
-                <ThemeToggle />
+        {/* Mini App dentro de Farcaster: render directo */}
+        {isMiniApp && (
+          <>
+            {/* Header sticky */}
+            <AppHeader 
+              isMiniApp={isMiniApp} 
+              network={network}
+              farcasterProfile={farcasterProfile}
+              onDisconnect={handleDisconnect}
+            />
+            
+            <div className="container mx-auto p-4 max-w-6xl">
+              {/* Título centrado */}
+              <div className="text-center mb-8">
+                <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-300">
+                  ⏰ ReMi
+                </h1>
+                <p className="text-gray-600 dark:text-gray-300 text-lg transition-colors duration-300">
+                  Tu Agenda Social Web3
+                </p>
               </div>
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-300">
-                ⏰ ReMi
-              </h1>
-              <p className="text-gray-600 dark:text-gray-300 text-lg transition-colors duration-300">
-                Tu Agenda Social Web3
-              </p>
+
+              {/* Selector de red centrado */}
+              <NetworkSelector 
+                network={network} 
+                onNetworkChange={setNetwork} 
+              />
+
+              {/* Componentes de debug */}
+              {isDebug && (
+                <div className="mb-6 space-y-4">
+                  <FarcasterMiniAppStatus />
+                  <FarcasterMiniAppTester />
+                  <SimpleFarcasterTest />
+                </div>
+              )}
+
+              {/* Dashboard principal */}
+              <Dashboard network={network} />
             </div>
+          </>
+        )}
 
-            {!isConnected ? (
-              <>
-                {/* Features - Only show when not connected */}
-                <div className="space-y-4 mb-8">
-                  <div className="flex items-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl transition-all duration-300">
-                    <span className="text-2xl mr-3">📅</span>
-                    <span className="text-gray-700 dark:text-gray-200 transition-colors duration-300">
-                      Recordatorios personales y sociales
-                    </span>
-                  </div>
-                  <div className="flex items-center p-4 bg-green-50 dark:bg-green-900/20 rounded-xl transition-all duration-300">
-                    <span className="text-2xl mr-3">💰</span>
-                    <span className="text-gray-700 dark:text-gray-200 transition-colors duration-300">
-                      Gana recompensas por cumplir tareas
-                    </span>
-                  </div>
-                  <div className="flex items-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl transition-all duration-300">
-                    <span className="text-2xl mr-3">🌟</span>
-                    <span className="text-gray-700 dark:text-gray-200 transition-colors duration-300">
-                      Construye tu reputación Web3
-                    </span>
-                  </div>
-                  <div className="flex items-center p-4 bg-pink-50 dark:bg-pink-900/20 rounded-xl transition-all duration-300">
-                    <span className="text-2xl mr-3">🐦</span>
-                    <span className="text-gray-700 dark:text-gray-200 transition-colors duration-300">
-                      Integración completa con Farcaster
-                    </span>
-                  </div>
+        {/* Web (fuera del host): CTA simple */}
+        {isMiniApp === false && (
+          <>
+            {/* Header sticky */}
+            <AppHeader 
+              isMiniApp={isMiniApp} 
+              network={network}
+              farcasterProfile={farcasterProfile}
+              onDisconnect={handleDisconnect}
+            />
+            
+            <div className="container mx-auto p-4 max-w-4xl">
+              {/* Título centrado */}
+              <div className="text-center mb-8">
+                <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-300">
+                  ⏰ ReMi
+                </h1>
+                <p className="text-gray-600 dark:text-gray-300 text-lg transition-colors duration-300">
+                  Tu Agenda Social Web3
+                </p>
+              </div>
+
+              {/* Selector de red centrado */}
+              <NetworkSelector 
+                network={network} 
+                onNetworkChange={setNetwork} 
+              />
+
+              {/* Componentes de debug (solo en desarrollo) */}
+              {isDebug && (
+                <div className="mb-6 space-y-4 bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                  <h3 className="font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
+                    🔧 Debug Mode (NEXT_PUBLIC_FC_DEBUG=1)
+                  </h3>
+                  <FarcasterMiniAppStatus />
+                  <FarcasterMiniAppTester />
+                  <SimpleFarcasterTest />
                 </div>
+              )}
 
-                {/* Wallet Connection */}
-                <div className="mb-8">
-                  <ConnectWallet />
-                </div>
-
-                {/* Reown + Farcaster Demo Button */}
-                <div className="mb-8">
-                  <button
-                    onClick={() => setShowReownDemo(!showReownDemo)}
-                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold py-3 px-6 rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-200 transform hover:scale-105 shadow-lg"
-                  >
-                    {showReownDemo ? 'Ocultar' : 'Mostrar'} Demo Reown + Farcaster
-                  </button>
-                </div>
-
-                {/* Reown + Farcaster Demo */}
-                {showReownDemo && (
-                  <div className="mb-8">
-                    <ReownFarcasterDemo />
-                  </div>
-                )}
-
-                {/* Help Section - Only show when not connected */}
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100 transition-colors duration-300">
-                      ¿Nuevo en Web3?
-                    </h2>
-                    <button
-                      onClick={() => setShowInstructions(!showInstructions)}
-                      className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-medium transition-colors duration-300"
-                    >
-                      {showInstructions ? 'Ocultar' : 'Mostrar'} ayuda
-                    </button>
-                  </div>
-
-                  {showInstructions && <WalletInstructions />}
-
-                  {!showInstructions && (
-                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-6 transition-all duration-300">
-                      <div className="text-center">
-                        <div className="text-4xl mb-4">🤝</div>
-                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2 transition-colors duration-300">
-                          ¿Primera vez en Web3?
-                        </h3>
-                        <p className="text-gray-600 dark:text-gray-300 mb-4 transition-colors duration-300">
-                          No te preocupes, te guiamos paso a paso para conectar tu wallet y empezar a usar ReMi.
-                        </p>
-                        <button
-                          onClick={() => setShowInstructions(true)}
-                          className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-lg transition-all duration-300"
-                        >
-                          Ver instrucciones
-                        </button>
+              {/* Contenido principal */}
+              <main className="space-y-8">
+                {!isConnected ? (
+                  <>
+                    {/* Hero Section */}
+                    <div className="text-center py-12">
+                      <div className="text-6xl mb-6">⏰</div>
+                      <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                        Tu Agenda Social Web3
+                      </h1>
+                      <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
+                        Gestiona tu tiempo, cumple tus metas y gana recompensas Web3 
+                        mientras construyes tu reputación social.
+                      </p>
+                      
+                      {/* CTA Principal único */}
+                      <div className="flex flex-col items-center space-y-4">
+                        <SignInWithFarcasterButton />
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          o{' '}
+                          <button 
+                            onClick={() => setShowWalletConnect(true)}
+                            className="text-blue-600 dark:text-blue-400 hover:underline"
+                          >
+                            Crear/Conectar wallet
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  )}
-                </div>
 
-                {/* Footer - Only show when not connected */}
-                <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 transition-colors duration-300">
-                  <div className="text-center text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300">
-                    <p>ReMi - Construyendo el futuro de la productividad Web3</p>
-                    <div className="flex justify-center space-x-4 mt-2">
-                      <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300">
-                        Documentación
-                      </a>
-                      <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300">
-                        Soporte
-                      </a>
-                      <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300">
-                        GitHub
-                      </a>
+                    {/* Wallet Connection Modal */}
+                    {showWalletConnect && (
+                      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
+                          <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                              Conectar Wallet
+                            </h2>
+                            <button
+                              onClick={() => setShowWalletConnect(false)}
+                              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                          <ConnectWallet />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Features Grid */}
+                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+                        <div className="text-3xl mb-4">📅</div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                          Recordatorios Inteligentes
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-300 text-sm">
+                          Nunca olvides tus tareas importantes con notificaciones personalizadas.
+                        </p>
+                      </div>
+                      
+                      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+                        <div className="text-3xl mb-4">💰</div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                          Recompensas Web3
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-300 text-sm">
+                          Gana tokens por completar tareas y mantener tu productividad.
+                        </p>
+                      </div>
+                      
+                      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+                        <div className="text-3xl mb-4">🌟</div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                          Reputación Social
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-300 text-sm">
+                          Construye tu credibilidad en la comunidad Web3.
+                        </p>
+                      </div>
+                      
+                      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+                        <div className="text-3xl mb-4">🚀</div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                          Integración Farcaster
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-300 text-sm">
+                          Conecta con tu red social descentralizada favorita.
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </>
-            ) : (
-              /* Dashboard when connected */
-              <div className="space-y-6">
-                {/* Selector de red (opcional) */}
-                <div className="flex justify-center space-x-4 mb-6">
-                  <button
-                    onClick={() => setNetwork('baseSepolia')}
-                    className={`px-4 py-2 rounded-lg transition-colors ${
-                      network === 'baseSepolia'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                    }`}
-                  >
-                    Base Sepolia
-                  </button>
-                  <button
-                    onClick={() => setNetwork('celoAlfajores')}
-                    className={`px-4 py-2 rounded-lg transition-colors ${
-                      network === 'celoAlfajores'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                    }`}
-                  >
-                    Celo Alfajores
-                  </button>
-                </div>
-
-                {/* ⬇️ Dashboard recibe la prop requerida */}
-                <Dashboard network={network} />
-
-                {/* Farcaster Dashboard */}
-                <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">
-                    🚀 Integración con Farcaster
-                  </h2>
-                  <FarcasterDashboard />
-                </div>
-
-                {/* Reown + Farcaster Integration */}
-                <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">
-                    🔗 Reown + Farcaster Integration
-                  </h2>
-                  <ReownFarcasterDemo />
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+                  </>
+                ) : (
+                  <>
+                    {/* Usuario conectado: Dashboard */}
+                    <div className="mt-8">
+                      <Dashboard network={network} />
+                    </div>
+                  </>
+                )}
+              </main>
+            </div>
+          </>
+        )}
       </div>
     </ClientOnly>
   )

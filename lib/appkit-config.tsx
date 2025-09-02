@@ -36,7 +36,7 @@ const celoAlfajores = defineChain({
   testnet: true,
 });
 
-// 2. Create wagmi config with smart detection and Farcaster support
+// 2. Create wagmi config with connectors
 const config = createConfig({
   chains: [baseSepolia, celoAlfajores],
   transports: {
@@ -44,43 +44,33 @@ const config = createConfig({
     [celoAlfajores.id]: http(),
   },
   connectors: [
-    // Injected connector for browser extensions (MetaMask, etc.)
+    // MetaMask - configuración más simple
     injected({
       target: 'metaMask',
-    }),
-    injected({
-      target: 'coinbaseWallet',
-    }),
-    injected({
-      target: 'tokenPocket',
-    }),
-    injected({
-      target: 'trust',
-    }),
-    // Generic injected for other wallets
-    injected(),
-    // WalletConnect for mobile wallets (including Farcaster)
-    walletConnect({
-      projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'your-project-id',
-      metadata: {
-        name: 'ReMi - Social Agenda Web3',
-        description: 'Tu agenda social con recompensas Web3 y integración Farcaster',
-        url: 'https://remi-app.vercel.app',
-        icons: ['https://remi-app.vercel.app/icon.png'],
-      },
-      // Evita mostrar QR modal dentro de Farcaster
-      showQrModal: false,
     }),
     // Coinbase Wallet
     coinbaseWallet({
       appName: 'ReMi - Social Agenda Web3',
       appLogoUrl: 'https://remi-app.vercel.app/icon.png',
     }),
+    // WalletConnect v2 - con tu projectId
+    walletConnect({
+      projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!,
+      metadata: {
+        name: 'ReMi - Social Agenda Web3',
+        description: 'Tu agenda social con recompensas Web3 y integración Farcaster',
+        url: 'https://remi-app.vercel.app',
+        icons: ['https://remi-app.vercel.app/icon.png'],
+      },
+    }),
+    // Generic injected para otras wallets (Brave, etc.)
+    injected(),
   ],
+  ssr: false, // Importante: deshabilitar SSR para wallets
 });
 
 // 3. AppKit Provider con manejo de hidratación
-export function AppKitProvider({ children }: { children: React.ReactNode }) {
+export function AppKitProviderWrapper({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {

@@ -141,34 +141,30 @@ export function TaskManager({ network }: TaskManagerProps) {
   };
 
   const toggleTaskCompletion = async (task: Task) => {
-    if (!address) return;
+    // 1) Optimista: marcar localmente para no bloquear por contrato/red
+    const becameCompleted = !task.completed
+    const locallyUpdated = tasks.map(t =>
+      t.id === task.id ? { ...t, completed: becameCompleted } : t
+    )
+    saveTasks(locallyUpdated)
 
-    setLoading(true);
+    if (becameCompleted) {
+      setShowConfetti(true)
+      setTimeout(() => setShowConfetti(false), 2000)
+    }
+
+    // 2) Intentar registrar on-chain en background (si aplica)
     try {
-      const contract = createRemiContract(network);
-      const result = await contract.completeTask(parseInt(task.id), task.priority);
-      
-      if (result.success) {
-        const updatedTasks = tasks.map(t => 
-          t.id === task.id ? { ...t, completed: !t.completed } : t
-        );
-        saveTasks(updatedTasks);
-
-        // Show notification
-        await notificationService.showTaskCompleted?.(task.title, result.reward);
-        
-        // Trigger confetti for completion
-        if (!task.completed) {
-          setShowConfetti(true);
-          setTimeout(() => setShowConfetti(false), 3000);
-        }
-      } else {
-        console.error('Error completing task:', result.error);
+      if (!address) return
+      const contract = createRemiContract(network)
+      const result = await contract.completeTask(parseInt(task.id), task.priority)
+      if (result?.success) {
+        await notificationService.showTaskCompleted?.(task.title, result.reward)
+      } else if (result && result.error) {
+        console.warn('Registro on-chain no aplicado (se mantiene local):', result.error)
       }
-    } catch (error) {
-      console.error('Error completing task:', error);
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      console.warn('Registro on-chain falló (se mantiene local):', err)
     }
   };
 

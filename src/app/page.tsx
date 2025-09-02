@@ -12,6 +12,7 @@ import { NetworkSelector } from '../../components/NetworkSelector'
 import { Dashboard } from '../../components/Dashboard'
 import { ClientOnly } from '../../components/ClientOnly'
 import { useMiniAppEnv } from '../../hooks/useMiniAppEnv'
+import { useFarcasterAuth } from '../../hooks/useFarcasterAuth'
 
 // Componentes de debug (solo en desarrollo)
 import { FarcasterMiniAppStatus } from '../../components/FarcasterMiniAppStatus'
@@ -29,6 +30,7 @@ export default function HomePage() {
   
   const { isConnected } = useAccount()
   const { isMiniApp, context } = useMiniAppEnv()
+  const { user: fcUser, isAuthenticated: isFcAuth, login: fcLogin, isInFarcaster } = useFarcasterAuth()
   
   // Flag de debug
   const isDebug = process.env.NEXT_PUBLIC_FC_DEBUG === '1'
@@ -39,6 +41,20 @@ export default function HomePage() {
       setShowWalletConnect(false)
     }
   }, [isConnected, showWalletConnect])
+
+  // Sincronizar perfil Farcaster desde hook (Mini App auto-login)
+  useEffect(() => {
+    if (fcUser && isFcAuth) {
+      setFarcasterProfile(fcUser)
+    }
+  }, [fcUser, isFcAuth])
+
+  // Si estamos dentro de Farcaster y aún no hay sesión, intentar login rápido
+  useEffect(() => {
+    if (isInFarcaster && !isFcAuth) {
+      fcLogin().catch(() => {})
+    }
+  }, [isInFarcaster, isFcAuth, fcLogin])
 
   // Función para desconectar
   const handleDisconnect = () => {

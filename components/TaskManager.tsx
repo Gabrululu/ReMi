@@ -5,6 +5,8 @@ import { useAccount } from 'wagmi';
 import { createRemiContract } from '../lib/contracts';
 import { notificationService } from '../lib/notifications';
 import { DashboardSkeleton } from './LoadingSkeleton';
+import { shareToFarcaster } from '../lib/share';
+import { formatDate } from '../utils/time';
 
 interface Task {
   id: string;
@@ -32,6 +34,7 @@ export function TaskManager({ network }: TaskManagerProps) {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [showConfetti, setShowConfetti] = useState(false);
+  const [showQuickAdd, setShowQuickAdd] = useState(false);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -55,6 +58,32 @@ export function TaskManager({ network }: TaskManagerProps) {
     if (!address || typeof window === 'undefined') return;
     localStorage.setItem(`tasks_${address}`, JSON.stringify(newTasks));
     setTasks(newTasks);
+  };
+
+  // Plantillas rápidas
+  const taskTemplates: Array<Partial<Task> & { label: string }> = [
+    { label: '🧘 15 min de estiramientos', title: '15 min de estiramientos', category: 'Salud', priority: 'LOW' },
+    { label: '📚 30 min de estudio', title: '30 min de estudio', category: 'Estudio', priority: 'MEDIUM' },
+    { label: '🚶 3k pasos', title: 'Caminar 3,000 pasos', category: 'Salud', priority: 'MEDIUM' },
+    { label: '💧 Beber 8 vasos de agua', title: 'Beber 8 vasos de agua', category: 'Salud', priority: 'LOW' }
+  ];
+
+  const applyTemplate = (tpl: Partial<Task> & { label: string }) => {
+    setShowForm(true);
+    setFormData({
+      title: tpl.title || '',
+      description: tpl.description || '',
+      dueDate: '',
+      priority: (tpl.priority as any) || 'MEDIUM',
+      category: tpl.category || 'General',
+      reminderTime: ''
+    });
+  };
+
+  const createQuickTask = () => {
+    if (!formData.title.trim()) return;
+    addTask();
+    setShowQuickAdd(false);
   };
 
   const addTask = () => {
@@ -143,6 +172,19 @@ export function TaskManager({ network }: TaskManagerProps) {
     }
   };
 
+  const handleShareTask = async (task: Task) => {
+    const statusEmoji = task.completed ? '✅' : '📝'
+    const copy = `${statusEmoji} ${task.title}\n\n` +
+      (task.description ? `${task.description}\n\n` : '') +
+      `Categoría: ${task.category} • Prioridad: ${task.priority}\n` +
+      (task.dueDate ? `Vence: ${formatDate(new Date(task.dueDate as any))}\n` : '') +
+      (task.completed ? `Recompensa: #REMI ganada ✨\n` : '') +
+      `\nSúmate a cumplir tus metas en ReMi ⏰✨\n#ReMi #Tarea`
+
+    const url = typeof window !== 'undefined' ? window.location.origin : undefined
+    await shareToFarcaster({ text: copy, url })
+  }
+
   const scheduleReminder = (task: Task) => {
     if (!task.reminderTime) return;
 
@@ -220,7 +262,7 @@ export function TaskManager({ network }: TaskManagerProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -417,6 +459,19 @@ export function TaskManager({ network }: TaskManagerProps) {
                 Crear Primera Tarea
               </button>
             )}
+
+            {/* Sugerencias 1‑click */}
+            <div className="mt-6 flex flex-wrap justify-center gap-2">
+              {taskTemplates.slice(0, 3).map((tpl) => (
+                <button
+                  key={tpl.label}
+                  onClick={() => applyTemplate(tpl)}
+                  className="px-3 py-1.5 text-sm rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600"
+                >
+                  {tpl.label}
+                </button>
+              ))}
+            </div>
           </div>
         ) : (
           filteredTasks.map(task => (
@@ -468,12 +523,12 @@ export function TaskManager({ network }: TaskManagerProps) {
                   <div className="flex items-center justify-between mt-3">
                     <div className="flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
                       {task.dueDate && (
-                        <span>📅 {new Date(task.dueDate).toLocaleDateString()}</span>
+                        <span>📅 {formatDate(new Date(task.dueDate as any))}</span>
                       )}
                       {task.reminderTime && (
                         <span>⏰ {new Date(task.reminderTime).toLocaleString()}</span>
                       )}
-                      <span>📅 {new Date(task.createdAt).toLocaleDateString()}</span>
+                      <span>📅 {formatDate(new Date(task.createdAt as any))}</span>
                     </div>
                     
                     <div className="flex items-center space-x-2">
@@ -489,6 +544,15 @@ export function TaskManager({ network }: TaskManagerProps) {
                       >
                         Eliminar
                       </button>
+                      {task.completed && (
+                        <button
+                          onClick={() => handleShareTask(task)}
+                          className="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 text-sm font-medium transition-colors duration-300"
+                          title="Compartir en Farcaster"
+                        >
+                          Compartir 🚀
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -497,6 +561,62 @@ export function TaskManager({ network }: TaskManagerProps) {
           ))
         )}
       </div>
+
+      {/* FAB: Crear tarea rápida */}
+      {!showForm && (
+        <div className="fixed right-5 bottom-20 md:bottom-8 z-50">
+          <button
+            onClick={() => {
+              setShowQuickAdd(true)
+              setFormData({ ...formData, title: '', description: '', dueDate: '', category: 'General', priority: 'MEDIUM', reminderTime: '' })
+            }}
+            className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white text-2xl shadow-lg hover:from-blue-700 hover:to-purple-700"
+            aria-label="Crear tarea rápida"
+          >
+            +
+          </button>
+        </div>
+      )}
+
+      {/* Quick Add Modal */}
+      {showQuickAdd && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-end md:items-center justify-center p-4 z-50">
+          <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-xl p-4 shadow-xl">
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="text-lg font-semibold text-gray-900 dark:text-white">Nueva tarea rápida</h4>
+              <button onClick={() => setShowQuickAdd(false)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <input
+                type="text"
+                placeholder="Título de la tarea"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+
+              {/* Chips de plantillas */}
+              <div className="flex flex-wrap gap-2">
+                {taskTemplates.map((tpl) => (
+                  <button
+                    key={tpl.label}
+                    onClick={() => applyTemplate(tpl)}
+                    className="px-2.5 py-1 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600"
+                  >
+                    {tpl.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-1">
+                <button onClick={() => setShowQuickAdd(false)} className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300">Cancelar</button>
+                <button onClick={createQuickTask} className="px-3 py-1.5 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700">Crear</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

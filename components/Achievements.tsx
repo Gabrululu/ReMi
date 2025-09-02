@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { createRemiContract } from '../lib/contracts';
+import { formatDate } from '../utils/time';
+import { shareToFarcaster } from '../lib/share';
 
 interface Achievement {
   id: string;
@@ -264,6 +266,15 @@ export function Achievements({ network, userStats }: AchievementsProps) {
   const unlockedCount = achievements.filter(a => a.unlocked).length;
   const totalCount = achievements.length;
 
+  const shareAchievement = async (a: Achievement) => {
+    const copy = `${a.icon} ${a.title}\n\n${a.description}\n\n` +
+      `Recompensa: ${a.reward} $REMI ✨\n` +
+      `Categoría: ${getCategoryName(a.category)}\n` +
+      `\nLogrado con ReMi ⏰✨\n#ReMi #Logro`
+    const url = typeof window !== 'undefined' ? window.location.origin : undefined
+    await shareToFarcaster({ text: copy, url })
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -396,11 +407,21 @@ export function Achievements({ network, userStats }: AchievementsProps) {
                       </span>
                     </div>
                     
-                    {achievement.unlocked && achievement.unlockedAt && (
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                        {new Date(achievement.unlockedAt).toLocaleDateString()}
-                      </span>
-                    )}
+                    <div className="flex items-center space-x-2">
+                      {achievement.unlocked && achievement.unlockedAt && (
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {formatDate(new Date(achievement.unlockedAt as any))}
+                        </span>
+                      )}
+                      {achievement.unlocked && (
+                        <button
+                          onClick={() => shareAchievement(achievement)}
+                          className="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 text-xs font-medium"
+                        >
+                          Compartir 🚀
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

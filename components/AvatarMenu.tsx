@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useAccount, useDisconnect } from 'wagmi'
 import { User, Settings, LogOut, ChevronDown, Wallet, MessageCircle, Plus } from 'lucide-react'
 import { ConnectionManager } from './ConnectionManager'
+import { useUiPrefs } from '../hooks/useUiPrefs'
 
 interface AvatarMenuProps {
   farcasterProfile?: any
@@ -16,6 +17,7 @@ export function AvatarMenu({ farcasterProfile, onDisconnect }: AvatarMenuProps) 
   const { isConnected, address } = useAccount()
   const { disconnect } = useDisconnect()
   const menuRef = useRef<HTMLDivElement>(null)
+  const { prefs, update } = useUiPrefs()
 
   // Cerrar menú al hacer click fuera
   useEffect(() => {
@@ -179,6 +181,26 @@ export function AvatarMenu({ farcasterProfile, onDisconnect }: AvatarMenuProps) 
               <span>Configuración</span>
             </div>
           </button>
+
+          {/* UI Toggles */}
+          <div className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 space-y-2">
+            <div className="flex items-center justify-between">
+              <span>Mostrar misiones</span>
+              <input
+                type="checkbox"
+                checked={prefs.showMissions}
+                onChange={(e) => update({ showMissions: e.target.checked })}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <span>Mostrar ranking</span>
+              <input
+                type="checkbox"
+                checked={prefs.showRanking}
+                onChange={(e) => update({ showRanking: e.target.checked })}
+              />
+            </div>
+          </div>
 
           {/* Disconnect Actions */}
           {(farcasterProfile || isConnected) && (

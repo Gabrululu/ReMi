@@ -8,6 +8,10 @@ import { WeeklyGoals } from './WeeklyGoals';
 import { Achievements } from './Achievements';
 import { UserStats } from './UserStats';
 import { Confetti } from './Confetti';
+import { WeeklyMissions } from './WeeklyMissions';
+import { StreakNudge } from './StreakNudge';
+import { FriendsRanking } from './FriendsRanking';
+import { useUiPrefs } from '../hooks/useUiPrefs';
 import { AnimatedBadge } from './AnimatedBadge';
 import { ProgressChart } from './ProgressChart';
 import { CalendarView } from './CalendarView';
@@ -26,6 +30,7 @@ export function Dashboard({ network }: DashboardProps) {
   const [loading, setLoading] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [tasks, setTasks] = useState<any[]>([]);
+  const { prefs, update } = useUiPrefs();
 
   useEffect(() => {
     if (typeof window !== 'undefined' && address) {
@@ -255,6 +260,17 @@ export function Dashboard({ network }: DashboardProps) {
       {/* Confetti Effect */}
       <Confetti isActive={showConfetti} />
 
+      {/* Streak Nudge (discreto y responsive) */}
+      {userStats?.streak > 0 && (
+        <StreakNudge
+          streak={userStats.streak}
+          onGoToTasks={() => setActiveTab('tasks')}
+        />
+      )}
+
+      {/* Weekly Missions (toggleable) */}
+      {prefs.showMissions && <WeeklyMissions userStats={userStats} />}
+
       {/* Navigation Tabs */}
       <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-2">
         <div className="flex space-x-1 overflow-x-auto">
@@ -336,6 +352,9 @@ export function Dashboard({ network }: DashboardProps) {
           </button>
         </div>
       </div>
+
+      {/* Friends Ranking (toggleable) */}
+      {prefs.showRanking && <FriendsRanking />}
 
       {/* Network Info - ocultado por solicitud del usuario */}
     </div>

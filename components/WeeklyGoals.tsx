@@ -5,6 +5,8 @@ import { useAccount } from 'wagmi';
 import { createRemiContract } from '../lib/contracts';
 import { notificationService } from '../lib/notifications';
 import { DashboardSkeleton } from './LoadingSkeleton';
+import { shareToFarcaster } from '../lib/share';
+import { formatDate } from '../utils/time';
 
 interface Goal {
   id: string;
@@ -30,6 +32,12 @@ export function WeeklyGoals({ network }: WeeklyGoalsProps) {
   const [showForm, setShowForm] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
+  const goalTemplates: Array<{ label: string; title: string; description?: string; unit?: string; targetValue?: number; reward?: number }> = [
+    { label: '🏃 Correr 10 km', title: 'Correr 10 km', unit: 'km', targetValue: 10, reward: 120 },
+    { label: '📖 Leer 50 páginas', title: 'Leer 50 páginas', unit: 'páginas', targetValue: 50, reward: 100 },
+    { label: '🧠 3 sesiones de estudio', title: '3 sesiones de estudio', unit: 'sesiones', targetValue: 3, reward: 150 },
+    { label: '💧 7 días hidratación', title: 'Beber 8 vasos por día', unit: 'días', targetValue: 7, reward: 100 }
+  ];
 
   const [formData, setFormData] = useState({
     title: '',
@@ -147,6 +155,17 @@ export function WeeklyGoals({ network }: WeeklyGoalsProps) {
     }
   };
 
+  const shareGoal = async (goal: Goal) => {
+    const copy = `🎯 ${goal.title}\n\n` +
+      (goal.description ? `${goal.description}\n\n` : '') +
+      `Objetivo: ${goal.targetValue} ${goal.unit}\n` +
+      (goal.completed ? `Estado: Completada ✅\nRecompensa: ${goal.reward} $REMI ✨\n` : '') +
+      `Fecha límite: ${goal.deadline ? formatDate(new Date(goal.deadline as any)) : '—'}\n` +
+      `\nCumplí mi meta con ReMi. ¡Únete! ⏰🚀\n#ReMi #Meta`
+    const url = typeof window !== 'undefined' ? window.location.origin : undefined
+    await shareToFarcaster({ text: copy, url })
+  }
+
   const resetForm = () => {
     setFormData({
       title: '',
@@ -157,6 +176,18 @@ export function WeeklyGoals({ network }: WeeklyGoalsProps) {
       reward: 100
     });
   };
+
+  const applyGoalTemplate = (tpl: { label: string; title: string; description?: string; unit?: string; targetValue?: number; reward?: number }) => {
+    setShowForm(true)
+    setFormData({
+      title: tpl.title,
+      description: tpl.description || '',
+      targetValue: tpl.targetValue ?? 1,
+      unit: tpl.unit ?? '',
+      deadline: '',
+      reward: tpl.reward ?? 100
+    })
+  }
 
   const editGoal = (goal: Goal) => {
     setEditingGoal(goal);
@@ -215,6 +246,19 @@ export function WeeklyGoals({ network }: WeeklyGoalsProps) {
         >
           🎯 Nueva Meta
         </button>
+      </div>
+
+      {/* Plantillas rápidas */}
+      <div className="flex flex-wrap gap-2">
+        {goalTemplates.map((tpl) => (
+          <button
+            key={tpl.label}
+            onClick={() => applyGoalTemplate(tpl)}
+            className="px-3 py-1.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600"
+          >
+            {tpl.label}
+          </button>
+        ))}
       </div>
 
       {/* Goal Form */}
@@ -343,6 +387,19 @@ export function WeeklyGoals({ network }: WeeklyGoalsProps) {
             >
               Crear Primera Meta
             </button>
+
+            {/* Sugerencias 1‑click */}
+            <div className="mt-6 flex flex-wrap justify-center gap-2">
+              {goalTemplates.slice(0,3).map((tpl) => (
+                <button
+                  key={tpl.label}
+                  onClick={() => applyGoalTemplate(tpl)}
+                  className="px-3 py-1.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600"
+                >
+                  {tpl.label}
+                </button>
+              ))}
+            </div>
           </div>
         ) : (
           goals.map(goal => {
@@ -449,9 +506,9 @@ export function WeeklyGoals({ network }: WeeklyGoalsProps) {
                 <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
                   <div className="flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
                     {goal.deadline && (
-                      <span>📅 {new Date(goal.deadline).toLocaleDateString()}</span>
+                      <span>📅 {formatDate(new Date(goal.deadline as any))}</span>
                     )}
-                    <span>📅 {new Date(goal.createdAt).toLocaleDateString()}</span>
+                    <span>📅 {formatDate(new Date(goal.createdAt as any))}</span>
                   </div>
                   
                   <div className="flex items-center space-x-2">
@@ -467,6 +524,15 @@ export function WeeklyGoals({ network }: WeeklyGoalsProps) {
                     >
                       Eliminar
                     </button>
+                    {goal.completed && (
+                      <button
+                        onClick={() => shareGoal(goal)}
+                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-medium transition-colors duration-300"
+                        title="Compartir en Farcaster"
+                      >
+                        Compartir 🚀
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

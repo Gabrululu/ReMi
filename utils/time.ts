@@ -2,7 +2,8 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export function formatDate(date: Date): string {
-  return format(date, 'PPP p', { locale: es });
+  // Formato solicitado: 28/02/2025 (dd/MM/yyyy)
+  return format(date, 'dd/MM/yyyy', { locale: es });
 }
 
 export function formatRelativeTime(date: Date): string {

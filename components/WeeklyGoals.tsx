@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
-import { createRemiContract } from '../lib/contracts';
+import { createRemiContract, createRemiProgressContract } from '../lib/contracts';
 import { notificationService } from '../lib/notifications';
 import { DashboardSkeleton } from './LoadingSkeleton';
 import { shareToFarcaster } from '../lib/share';
@@ -135,6 +135,7 @@ export function WeeklyGoals({ network }: WeeklyGoalsProps) {
 
     setLoading(true);
     try {
+      // Try token contract first (for rewards)
       const contract = createRemiContract(network);
       const result = await contract.completeWeeklyGoal(parseInt(goal.id));
       
@@ -147,6 +148,16 @@ export function WeeklyGoals({ network }: WeeklyGoalsProps) {
         setTimeout(() => setShowConfetti(false), 3000);
       } else {
         console.error('Error completing goal:', result.error);
+      }
+
+      // Also try progress contract for tracking
+      try {
+        const progressContract = createRemiProgressContract(network);
+        await progressContract.connectWallet();
+        await progressContract.completeGoal(parseInt(goal.id));
+        console.log('Goal progress registered on-chain ✓');
+      } catch (progressError) {
+        console.warn('Progress tracking failed (keeping local state):', progressError);
       }
     } catch (error) {
       console.error('Error completing goal:', error);

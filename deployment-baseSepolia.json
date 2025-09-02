@@ -1,5 +1,8 @@
 {
   "network": "baseSepolia",
-  "address": "0x2bd8AbEB2F5598f8477560C70c742aFfc22912de",
-  "deployedAt": "2025-07-06T04:14:39.735Z"
+  "deployedAt": "2025-09-02T18:08:08.593Z",
+  "contracts": {
+    "remiToken": "0x56018a39f418C8e4b138648e2D307F137b2Ec3d8",
+    "remiProgress": "0xa89fb8A3f72C77cA15cfb8a1903f6Ef4D48bed82"
+  }
 }

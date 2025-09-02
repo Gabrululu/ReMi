@@ -46,6 +46,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Pausable__factory>;
     getContractFactory(
+      name: "RemiProgress",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.RemiProgress__factory>;
+    getContractFactory(
       name: "RemiToken",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.RemiToken__factory>;
@@ -91,6 +95,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Pausable>;
     getContractAt(
+      name: "RemiProgress",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.RemiProgress>;
+    getContractAt(
       name: "RemiToken",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -129,6 +138,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Pausable>;
     deployContract(
+      name: "RemiProgress",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.RemiProgress>;
+    deployContract(
       name: "RemiToken",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.RemiToken>;
@@ -173,6 +186,11 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Pausable>;
+    deployContract(
+      name: "RemiProgress",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.RemiProgress>;
     deployContract(
       name: "RemiToken",
       args: any[],

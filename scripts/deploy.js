@@ -1,4 +1,4 @@
-import * as fs from "fs";
+const fs = require("fs");
 
 const hre = require("hardhat");
 
@@ -29,7 +29,7 @@ async function main() {
     const gasPrice = await hre.ethers.provider.getFeeData();
     console.log(`Current gas price: ${hre.ethers.formatUnits(gasPrice.gasPrice || 0, 'gwei')} gwei`);
     
-    const deploymentInfo: any = {
+    const deploymentInfo = {
       network: networkName,
       deployedAt: new Date().toISOString(),
       contracts: {}
@@ -122,4 +122,4 @@ main()
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error("❌ Script failed:", errorMessage);
     process.exit(1);
-  }); 
+  });

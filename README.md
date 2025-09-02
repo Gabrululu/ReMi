@@ -10,6 +10,7 @@ Una aplicación de agenda social con recompensas Web3, construida con Next.js, T
 - 🔗 **Conexión de wallet simplificada con Wagmi**
 - 🌐 **Soporte para Base Sepolia y Celo Alfajores**
 - 🐦 **Integración con Farcaster**
+- 📊 **Tracking on-chain de progreso y reputación**
 
 ## 🛠️ Tecnologías
 
@@ -40,8 +41,10 @@ Crea un archivo `.env.local` en la raíz del proyecto:
 NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_walletconnect_project_id_here
 
 # Contract Addresses
-NEXT_PUBLIC_REMI_TOKEN_BASE=0x2bd8AbEB2F5598f8477560C70c742aFfc22912de
+NEXT_PUBLIC_REMI_TOKEN_BASE=0x56018a39f418C8e4b138648e2D307F137b2Ec3d8
 NEXT_PUBLIC_REMI_TOKEN_CELO=0x321a83089D68c37c2Ee4Df00cC30B4D330f0399B
+NEXT_PUBLIC_REMI_PROGRESS_BASE=0xa89fb8A3f72C77cA15cfb8a1903f6Ef4D48bed82
+NEXT_PUBLIC_REMI_PROGRESS_CELO=0x0000000000000000000000000000000000000000
 
 # Network RPC URLs
 NEXT_PUBLIC_BASE_SEPOLIA_RPC=https://sepolia.base.org
@@ -80,13 +83,48 @@ La aplicación usa **Wagmi** para una experiencia de conexión de wallet moderna
 - **Chain ID**: 84532
 - **RPC**: https://sepolia.base.org
 - **Explorer**: https://sepolia.basescan.org
-- **Contract**: `0x2bd8AbEB2F5598f8477560C70c742aFfc22912de`
+- **RemiToken**: `0x56018a39f418C8e4b138648e2D307F137b2Ec3d8`
+- **RemiProgress**: `0xa89fb8A3f72C77cA15cfb8a1903f6Ef4D48bed82`
 
 ### Celo Alfajores
 - **Chain ID**: 44787
 - **RPC**: https://alfajores-forno.celo-testnet.org
 - **Explorer**: https://alfajores.celoscan.io
-- **Contract**: `0x321a83089D68c37c2Ee4Df00cC30B4D330f0399B`
+- **RemiToken**: `0x321a83089D68c37c2Ee4Df00cC30B4D330f0399B`
+- **RemiProgress**: `0x0000000000000000000000000000000000000000` (pendiente de deploy)
+
+## 📊 Smart Contracts
+
+### RemiToken.sol
+- **Propósito**: Token ERC20 para recompensas
+- **Funciones**: `completeTask()`, `completeWeeklyGoal()`, `rewardFarcasterShare()`
+- **Eventos**: `TaskCompleted`, `StreakBonus`, `FarcasterShare`, `WeeklyGoal`
+
+### RemiProgress.sol
+- **Propósito**: Tracking on-chain de progreso y reputación
+- **Funciones**: `completeTask()`, `completeGoal()`, `bumpStreak()`, `setMissionProgress()`
+- **Eventos**: `TaskCompleted`, `GoalCompleted`, `StreakUpdated`, `MissionProgressed`
+- **Características**: Misiones semanales, rachas diarias, métricas verificables
+
+## 🚀 Deploy de Contratos
+
+### Comandos de Deploy
+```bash
+# Deploy en Base Sepolia
+npx hardhat run scripts/deploy.ts --network baseSepolia
+
+# Deploy en Celo Alfajores
+npx hardhat run scripts/deploy.ts --network celoAlfajores
+```
+
+### Verificación de Contratos
+```bash
+# Verificar en Base Sepolia
+npx hardhat verify --network baseSepolia <CONTRACT_ADDRESS>
+
+# Verificar en Celo Alfajores
+npx hardhat verify --network celoAlfajores <CONTRACT_ADDRESS>
+```
 
 ## 💡 Uso
 
@@ -99,37 +137,37 @@ La aplicación usa **Wagmi** para una experiencia de conexión de wallet moderna
    - Cambia entre Base Sepolia y Celo Alfajores
    - La aplicación automáticamente se adaptará a la red seleccionada
 
-3. **Interactúa con la App**
-   - Completa tareas para ganar tokens REMI
-   - Construye tu reputación Web3
-   - Comparte tus logros en Farcaster
+3. **Crea y Completa Tareas**
+   - Las tareas se guardan localmente para UX rápida
+   - El progreso se registra on-chain en background
+   - Recibe tokens REMI por completar tareas
 
-## 🏗️ Estructura del Proyecto
+4. **Gestiona Metas Semanales**
+   - Establece objetivos semanales
+   - El progreso se sincroniza con el contrato de reputación
+   - Comparte logros en Farcaster
 
-```
-remi-miniapp/
-├── src/
-│   ├── app/
-│   │   ├── layout.tsx          # Layout principal con providers
-│   │   ├── page.tsx            # Página principal
-│   │   └── providers.tsx       # Providers de Wagmi
-│   └── components/
-│       ├── ConnectWallet.tsx   # Componente de conexión
-│       └── UserStats.tsx       # Estadísticas del usuario
-├── lib/
-│   ├── appkit-config.ts        # Configuración de Wagmi
-│   ├── contracts.ts            # Servicios de smart contracts
-│   └── networks.ts             # Configuración de redes
-└── contracts/
-    └── RemiToken.sol           # Smart contract principal
-```
+5. **Mantén tu Racha**
+   - Haz check-in diario para mantener tu racha
+   - Las rachas se verifican on-chain
+   - Recibe bonificaciones por consistencia
 
-## 🔗 Enlaces Útiles
+## 🔍 Tracking On-Chain
 
-- [Wagmi Documentation](https://wagmi.sh)
-- [WalletConnect Cloud](https://cloud.walletconnect.com)
-- [Base Sepolia Faucet](https://www.coinbase.com/faucets/base-ethereum-sepolia-faucet)
-- [Celo Alfajores Faucet](https://faucet.celo.org/alfajores)
+La aplicación implementa un sistema híbrido:
+
+- **Optimistic UI**: Las acciones se reflejan inmediatamente en la UI
+- **Background Sync**: El progreso se registra on-chain sin bloquear la experiencia
+- **Fallback Graceful**: Si falla la transacción on-chain, se mantiene el estado local
+- **Verificación**: Los usuarios pueden ver qué datos están verificados on-chain
+
+## 📈 Métricas Verificables
+
+- ✅ Tareas completadas
+- 🎯 Metas semanales alcanzadas
+- 🔥 Rachas diarias mantenidas
+- 📊 Progreso en misiones semanales
+- 💰 Tokens REMI ganados
 
 ## 🤝 Contribuir
 
@@ -141,15 +179,4 @@ remi-miniapp/
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
-
-## 🆘 Soporte
-
-Si tienes problemas o preguntas:
-- Revisa la [documentación de Wagmi](https://wagmi.sh)
-- Abre un issue en el repositorio
-- Contacta al equipo de desarrollo
-
----
-
-**¡Disfruta construyendo tu reputación Web3 con ReMi!** 🚀
+Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.

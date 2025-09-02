@@ -22,5 +22,7 @@ export type { IERC20 } from "./@openzeppelin/contracts/token/ERC20/IERC20";
 export { IERC20__factory } from "./factories/@openzeppelin/contracts/token/ERC20/IERC20__factory";
 export type { Pausable } from "./@openzeppelin/contracts/utils/Pausable";
 export { Pausable__factory } from "./factories/@openzeppelin/contracts/utils/Pausable__factory";
+export type { RemiProgress } from "./contracts/RemiProgress";
+export { RemiProgress__factory } from "./factories/contracts/RemiProgress__factory";
 export type { RemiToken } from "./contracts/RemiToken";
 export { RemiToken__factory } from "./factories/contracts/RemiToken__factory";

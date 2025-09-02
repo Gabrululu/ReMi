@@ -1,6 +1,8 @@
 'use client'
 
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
+import { useAccount } from 'wagmi'
+import { createRemiProgressContract } from '../lib/contracts'
 
 interface WeeklyMissionsProps {
   userStats?: any
@@ -13,10 +15,45 @@ interface MissionDef {
   target: number
   progress: number
   emoji: string
+  onChainProgress?: number
 }
 
 export function WeeklyMissions({ userStats }: WeeklyMissionsProps) {
+  const { address } = useAccount()
   const [showAll, setShowAll] = useState(false)
+  const [onChainMissions, setOnChainMissions] = useState<any>({})
+  const [loading, setLoading] = useState(false)
+
+  // Load on-chain mission progress
+  useEffect(() => {
+    const loadOnChainProgress = async () => {
+      if (!address) return
+      
+      setLoading(true)
+      try {
+        const progressContract = createRemiProgressContract('baseSepolia') // Default network
+        const missionIds = [101, 102, 103] // Week 1, missions 0, 1, 2
+        
+        const progress: any = {}
+        for (const missionId of missionIds) {
+          try {
+            const missionProgress = await progressContract.getProgresoMision(address, missionId)
+            progress[missionId] = Number(missionProgress)
+          } catch (error) {
+            console.warn(`Failed to load mission ${missionId} progress:`, error)
+          }
+        }
+        setOnChainMissions(progress)
+      } catch (error) {
+        console.warn('Failed to load on-chain missions:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadOnChainProgress()
+  }, [address])
+
   const missions = useMemo<MissionDef[]>(() => {
     const tasksCompleted = Number(userStats?.tasksCompleted ?? 0)
     const weeklyGoals = Number(userStats?.weeklyGoals ?? 0)
@@ -30,6 +67,7 @@ export function WeeklyMissions({ userStats }: WeeklyMissionsProps) {
         emoji: '✅',
         target: 5,
         progress: Math.min(tasksCompleted % 50, 5),
+        onChainProgress: onChainMissions[101] || 0,
       },
       {
         id: 'm_goals_1',
@@ -38,6 +76,7 @@ export function WeeklyMissions({ userStats }: WeeklyMissionsProps) {
         emoji: '🎯',
         target: 1,
         progress: Math.min(weeklyGoals % 10, 1),
+        onChainProgress: onChainMissions[102] || 0,
       },
       {
         id: 'm_streak_3',
@@ -46,9 +85,10 @@ export function WeeklyMissions({ userStats }: WeeklyMissionsProps) {
         emoji: '🔥',
         target: 3,
         progress: Math.min(streak % 7, 3),
+        onChainProgress: onChainMissions[103] || 0,
       },
     ]
-  }, [userStats])
+  }, [userStats, onChainMissions])
 
   const visible = showAll ? missions : missions.slice(0, 2)
 
@@ -59,13 +99,22 @@ export function WeeklyMissions({ userStats }: WeeklyMissionsProps) {
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Misiones semanales</h3>
           <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300">Retos ligeros para mantener foco</p>
         </div>
-        <div className="hidden md:block text-xs text-gray-500 dark:text-gray-400">Actualiza a lo largo de la semana</div>
+        <div className="hidden md:flex items-center gap-2">
+          {loading && (
+            <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></div>
+          )}
+          <div className="text-xs text-gray-500 dark:text-gray-400">Actualiza a lo largo de la semana</div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-3">
         {visible.map(m => {
-          const pct = Math.round((m.progress / m.target) * 100)
-          const done = m.progress >= m.target
+          // Use on-chain progress if available, otherwise fall back to local
+          const actualProgress = m.onChainProgress !== undefined ? m.onChainProgress : m.progress
+          const pct = Math.round((actualProgress / m.target) * 100)
+          const done = actualProgress >= m.target
+          const hasOnChainData = m.onChainProgress !== undefined
+          
           return (
             <div key={m.id} className={`rounded-lg p-3 border transition-colors ${done ? 'border-green-400 bg-green-50 dark:bg-green-900/20' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'}`}>
               <div className="flex items-start gap-2">
@@ -77,7 +126,12 @@ export function WeeklyMissions({ userStats }: WeeklyMissionsProps) {
                     <div className="w-full h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
                       <div className={`h-full ${done ? 'bg-green-500' : 'bg-blue-500'}`} style={{ width: `${Math.min(100, pct)}%` }} />
                     </div>
-                    <div className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">{m.progress}/{m.target}</div>
+                    <div className="mt-1 flex items-center justify-between">
+                      <div className="text-[11px] text-gray-500 dark:text-gray-400">{actualProgress}/{m.target}</div>
+                      {hasOnChainData && (
+                        <div className="text-[10px] text-blue-500 dark:text-blue-400">On-chain ✓</div>
+                      )}
+                    </div>
                   </div>
                 </div>
                 {done && <span className="text-green-500 text-sm">✔</span>}

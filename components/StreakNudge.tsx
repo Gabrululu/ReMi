@@ -1,14 +1,41 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
+import { useAccount } from 'wagmi'
+import { createRemiProgressContract } from '../lib/contracts'
 
 interface StreakNudgeProps {
-  streak?: number
-  onGoToTasks: () => void
+  userStats?: any
+  setActiveTab: (tab: string) => void
 }
 
-export function StreakNudge({ streak = 0, onGoToTasks }: StreakNudgeProps) {
+export function StreakNudge({ userStats, setActiveTab }: StreakNudgeProps) {
+  const { address } = useAccount()
+  const [loading, setLoading] = useState(false)
+  
+  const streak = userStats?.streak || 0
+  
   if (streak <= 0) return null
+
+  const handleBumpStreak = async () => {
+    if (!address) return
+    
+    setLoading(true)
+    try {
+      const progressContract = createRemiProgressContract('baseSepolia') // Default network
+      await progressContract.connectWallet()
+      const success = await progressContract.bumpStreak()
+      
+      if (success) {
+        console.log('Streak bumped on-chain ✓')
+        // Optionally show a success message or update UI
+      }
+    } catch (error) {
+      console.warn('Failed to bump streak on-chain:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="rounded-xl border border-yellow-300 dark:border-yellow-700 bg-yellow-50 dark:bg-yellow-900/20 p-3 flex items-center justify-between">
@@ -23,12 +50,21 @@ export function StreakNudge({ streak = 0, onGoToTasks }: StreakNudgeProps) {
           </div>
         </div>
       </div>
-      <button
-        onClick={onGoToTasks}
-        className="ml-3 shrink-0 px-3 py-1.5 text-xs rounded-lg bg-yellow-500 text-white hover:bg-yellow-600"
-      >
-        Completar ahora
-      </button>
+      <div className="flex gap-2 ml-3 shrink-0">
+        <button
+          onClick={() => setActiveTab('tasks')}
+          className="px-3 py-1.5 text-xs rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 transition-colors"
+        >
+          Completar ahora
+        </button>
+        <button
+          onClick={handleBumpStreak}
+          disabled={loading}
+          className="px-3 py-1.5 text-xs rounded-lg bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-50 transition-colors"
+        >
+          {loading ? '...' : 'Check-in'}
+        </button>
+      </div>
     </div>
   )
 }

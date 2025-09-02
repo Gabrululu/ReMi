@@ -1,7 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAccount, useBalance } from 'wagmi';
+import { createRemiProgressContract } from '../lib/contracts';
 
 interface UserStatsProps {
   userStats: {
@@ -16,6 +17,8 @@ interface UserStatsProps {
 
 export function UserStats({ userStats, network, loading }: UserStatsProps) {
   const { address } = useAccount();
+  const [onChainStats, setOnChainStats] = useState<any>(null);
+  const [onChainLoading, setOnChainLoading] = useState(false);
   
   const { data: balance } = useBalance({
     address,
@@ -23,6 +26,34 @@ export function UserStats({ userStats, network, loading }: UserStatsProps) {
       ? '0x2bd8AbEB2F5598f8477560C70c742aFfc22912de'
       : '0x321a83089D68c37c2Ee4Df00cC30B4D330f0399B'
   });
+
+  // Load on-chain stats
+  useEffect(() => {
+    const loadOnChainStats = async () => {
+      if (!address) return;
+      
+      setOnChainLoading(true);
+      try {
+        const progressContract = createRemiProgressContract(network);
+        const stats = await progressContract.getProgreso(address);
+        setOnChainStats(stats);
+      } catch (error) {
+        console.warn('Failed to load on-chain stats:', error);
+      } finally {
+        setOnChainLoading(false);
+      }
+    };
+
+    loadOnChainStats();
+  }, [address, network]);
+
+  // Combine local and on-chain stats (prefer on-chain if available)
+  const combinedStats = onChainStats ? {
+    tasksCompleted: Math.max(userStats?.tasksCompleted || 0, onChainStats.tareasCompletadas),
+    streak: Math.max(userStats?.streak || 0, onChainStats.rachaActual),
+    balance: userStats?.balance || 0,
+    weeklyGoals: Math.max(userStats?.weeklyGoals || 0, onChainStats.metasCompletadas)
+  } : userStats;
 
   if (loading) {
     return (
@@ -35,7 +66,7 @@ export function UserStats({ userStats, network, loading }: UserStatsProps) {
     );
   }
 
-  if (!userStats) {
+  if (!combinedStats) {
     return (
       <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6">
         <div className="text-center py-8">
@@ -46,6 +77,12 @@ export function UserStats({ userStats, network, loading }: UserStatsProps) {
           <p className="text-gray-600 dark:text-gray-300">
             Completa tu primera tarea para ver tus estadísticas
           </p>
+          {onChainLoading && (
+            <div className="mt-4 flex items-center justify-center">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+              <span className="ml-2 text-xs text-gray-500">Cargando on-chain...</span>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -66,7 +103,7 @@ export function UserStats({ userStats, network, loading }: UserStatsProps) {
     return { level: 'Novato', emoji: '🎯' };
   };
 
-  const level = getLevel(userStats.tasksCompleted);
+  const level = getLevel(combinedStats.tasksCompleted);
 
   return (
     <div className="space-y-6">
@@ -82,13 +119,13 @@ export function UserStats({ userStats, network, loading }: UserStatsProps) {
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Progreso</span>
             <span className="text-sm font-bold text-purple-600 dark:text-purple-400">
-              {userStats.tasksCompleted} tareas
+              {combinedStats.tasksCompleted} tareas
             </span>
           </div>
           <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
             <div 
               className="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${Math.min((userStats.tasksCompleted / 100) * 100, 100)}%` }}
+              style={{ width: `${Math.min((combinedStats.tasksCompleted / 100) * 100, 100)}%` }}
             ></div>
           </div>
         </div>
@@ -99,15 +136,15 @@ export function UserStats({ userStats, network, loading }: UserStatsProps) {
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 text-center">
           <div className="text-3xl mb-2">✅</div>
           <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-            {userStats.tasksCompleted}
+            {combinedStats.tasksCompleted}
           </div>
           <div className="text-sm text-gray-600 dark:text-gray-300">Tareas Completadas</div>
         </div>
 
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 text-center">
-          <div className="text-3xl mb-2">{getStreakEmoji(userStats.streak)}</div>
+          <div className="text-3xl mb-2">{getStreakEmoji(combinedStats.streak)}</div>
           <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-            {userStats.streak}
+            {combinedStats.streak}
           </div>
           <div className="text-sm text-gray-600 dark:text-gray-300">Días de Racha</div>
         </div>
@@ -123,7 +160,7 @@ export function UserStats({ userStats, network, loading }: UserStatsProps) {
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 text-center">
           <div className="text-3xl mb-2">🎯</div>
           <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-            {userStats.weeklyGoals}
+            {combinedStats.weeklyGoals}
           </div>
           <div className="text-sm text-gray-600 dark:text-gray-300">Metas Semanales</div>
         </div>
@@ -133,7 +170,7 @@ export function UserStats({ userStats, network, loading }: UserStatsProps) {
       <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Logros</h3>
         <div className="space-y-3">
-          {userStats.tasksCompleted >= 1 && (
+          {combinedStats.tasksCompleted >= 1 && (
             <div className="flex items-center space-x-3">
               <div className="text-2xl">🎉</div>
               <div>
@@ -143,7 +180,7 @@ export function UserStats({ userStats, network, loading }: UserStatsProps) {
             </div>
           )}
           
-          {userStats.streak >= 3 && (
+          {combinedStats.streak >= 3 && (
             <div className="flex items-center space-x-3">
               <div className="text-2xl">⚡</div>
               <div>
@@ -153,7 +190,7 @@ export function UserStats({ userStats, network, loading }: UserStatsProps) {
             </div>
           )}
           
-          {userStats.streak >= 7 && (
+          {combinedStats.streak >= 7 && (
             <div className="flex items-center space-x-3">
               <div className="text-2xl">🔥</div>
               <div>
@@ -163,7 +200,7 @@ export function UserStats({ userStats, network, loading }: UserStatsProps) {
             </div>
           )}
           
-          {userStats.tasksCompleted >= 10 && (
+          {combinedStats.tasksCompleted >= 10 && (
             <div className="flex items-center space-x-3">
               <div className="text-2xl">📈</div>
               <div>
@@ -173,7 +210,7 @@ export function UserStats({ userStats, network, loading }: UserStatsProps) {
             </div>
           )}
           
-          {userStats.weeklyGoals >= 1 && (
+          {combinedStats.weeklyGoals >= 1 && (
             <div className="flex items-center space-x-3">
               <div className="text-2xl">🎯</div>
               <div>

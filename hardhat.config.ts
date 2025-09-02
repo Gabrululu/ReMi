@@ -1,7 +1,6 @@
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-verify";
-import "ts-node/register";
 
 // Load environment variables FIRST, before any other imports
 import * as dotenv from "dotenv";

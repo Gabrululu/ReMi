@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
-import { createRemiContract } from '../lib/contracts';
+import { createRemiContract, createRemiProgressContract } from '../lib/contracts';
 import { notificationService } from '../lib/notifications';
 import { DashboardSkeleton } from './LoadingSkeleton';
 import { shareToFarcaster } from '../lib/share';
@@ -141,30 +141,49 @@ export function TaskManager({ network }: TaskManagerProps) {
   };
 
   const toggleTaskCompletion = async (task: Task) => {
-    // 1) Optimista: marcar localmente para no bloquear por contrato/red
-    const becameCompleted = !task.completed
-    const locallyUpdated = tasks.map(t =>
-      t.id === task.id ? { ...t, completed: becameCompleted } : t
-    )
-    saveTasks(locallyUpdated)
+    if (!address) return;
 
-    if (becameCompleted) {
-      setShowConfetti(true)
-      setTimeout(() => setShowConfetti(false), 2000)
+    // Optimistic UI update
+    const updatedTasks = tasks.map(t =>
+      t.id === task.id ? { ...t, completed: !t.completed } : t
+    );
+    saveTasks(updatedTasks); // Update local storage and state immediately
+
+    // If task is now completed, trigger confetti
+    if (!task.completed) { // If it was not completed before, and now it is
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 3000);
     }
 
-    // 2) Intentar registrar on-chain en background (si aplica)
+    setLoading(true); // Still show loading for the on-chain transaction
     try {
-      if (!address) return
-      const contract = createRemiContract(network)
-      const result = await contract.completeTask(parseInt(task.id), task.priority)
-      if (result?.success) {
-        await notificationService.showTaskCompleted?.(task.title, result.reward)
-      } else if (result && result.error) {
-        console.warn('Registro on-chain no aplicado (se mantiene local):', result.error)
+      // Try token contract first (for rewards)
+      const contract = createRemiContract(network);
+      const result = await contract.completeTask(parseInt(task.id), task.priority);
+
+      if (result.success) {
+        // Notification only if on-chain transaction is successful
+        await notificationService.showTaskCompleted?.(task.title, result.reward);
+      } else {
+        console.error('Error completing task on-chain:', result.error);
+        // Optionally revert UI if on-chain fails, but for optimistic UI, we might keep it as is
+        // For now, we just log the error and keep the optimistic state
       }
-    } catch (err) {
-      console.warn('Registro on-chain falló (se mantiene local):', err)
+
+      // Also try progress contract for tracking
+      try {
+        const progressContract = createRemiProgressContract(network);
+        await progressContract.connectWallet();
+        await progressContract.completeTask(parseInt(task.id));
+        console.log('Task progress registered on-chain ✓');
+      } catch (progressError) {
+        console.warn('Progress tracking failed (keeping local state):', progressError);
+      }
+    } catch (error) {
+      console.error('Error completing task on-chain:', error);
+      // For now, we just log the error and keep the optimistic state
+    } finally {
+      setLoading(false);
     }
   };
 
